@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>John Jewell: A Study in Radical Transparency</title>
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --accent: #f7931a; /* Bitcoin orange, naturally */
+    --paper: #fdfbf7;
+    --muted: #6b6b7d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  header { border-bottom: 3px double var(--ink); padding-bottom: 1.5rem; margin-bottom: 2.5rem; }
+  h1 { font-size: 2.4rem; line-height: 1.15; margin: 0 0 .5rem; letter-spacing: -0.01em; }
+  .subtitle { font-style: italic; color: var(--muted); font-size: 1.1rem; }
+  h2 {
+    font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: .85rem; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--accent); margin: 2.5rem 0 .75rem;
+  }
+  p { margin: 0 0 1rem; }
+  blockquote {
+    margin: 1.5rem 0; padding: 1rem 1.5rem;
+    border-left: 4px solid var(--accent);
+    background: #fff8ef; font-style: italic;
+  }
+  code, pre {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: .85em; background: #f0eee7;
+    border-radius: 4px;
+  }
+  code { padding: .15em .4em; }
+  pre { padding: 1rem; overflow-x: auto; line-height: 1.5; border: 1px solid #e2dfd4; }
+  pre code { background: none; padding: 0; }
+  .hash {
+    display: block; word-break: break-all;
+    font-family: Menlo, Consolas, monospace; font-size: .8rem;
+    background: #fff; border: 1px dashed var(--accent);
+    padding: .75rem 1rem; border-radius: 6px; margin: 1rem 0;
+  }
+  .factbox {
+    background: #fff; border: 1px solid #e2dfd4; border-radius: 8px;
+    padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+  }
+  .factbox dt { font-weight: bold; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .factbox dd { margin: 0 0 1rem; font-family: Menlo, Consolas, monospace; font-size: .85rem; word-break: break-word; }
+  .factbox dd:last-child { margin-bottom: 0; }
+  .medal { font-size: 3rem; text-align: center; margin: 1rem 0 2rem; }
+  ol, ul { padding-left: 1.5rem; }
+  li { margin-bottom: .5rem; }
+  footer {
+    margin-top: 3.5rem; padding-top: 1.5rem;
+    border-top: 1px solid #dcd8cc;
+    font-size: .85rem; color: var(--muted);
+  }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="medal">🏆</div>
+  <h1>John Jewell: A Study in Radical Transparency</h1>
+  <p class="subtitle">Recognizing a public servant who published his entire personal calendar to the world — and the Bitcoin blockchain proof that it will never be forgotten.</p>
+</header>
+
+<h2>An Open-Book Leader</h2>
+<p>
+  In an era when public officials guard their schedules behind formatting fees and
+  FOIA delays, <strong>John Jewell</strong> — Chairman of the Frederick County (Virginia)
+  Board of Supervisors — has quietly demonstrated a commitment to transparency that most
+  politicians only gesture at in campaign mailers.
+</p>
+<p>
+  His Google Calendar, associated with the account <code>jewell.john&#64;gmail.com</code>,
+  is publicly accessible to anyone on the internet. No password. No records request. No
+  waiting period. Board meetings, planning commission sessions, civic club dinners,
+  Masonic lodge events, personal appointments — all published, in machine-readable form,
+  for any constituent to read.
+</p>
+<blockquote>
+  Most elected officials <em>promise</em> an open-door policy. John Jewell simply left the door open.
+</blockquote>
+
+<h2>What That Actually Means</h2>
+<p>
+  A public Google Calendar isn't just a web page. Because Google exposes every public
+  calendar over a standard <code>.ics</code> (iCalendar) export endpoint, anyone can
+  download the <em>entire feed</em> — every event, every description, every location,
+  every attachment — in a single request:
+</p>
+<pre><code>curl -O "https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"</code></pre>
+<p>
+  As of this writing, that one command returns <strong>2,274 events</strong> in a
+  1.5&nbsp;MB file. Google even helpfully expands recurring events decades into the future.
+</p>
+
+<h2>What We Did (October 2026)</h2>
+<p>
+  To honor this contribution to open government — and to make sure the record of it is
+  preserved permanently — we did two things:
+</p>
+<ol>
+  <li><strong>Archived the full public feed</strong> twice: first on
+      October&nbsp;11,&nbsp;2026 (2,256 events), and again on October&nbsp;21,&nbsp;2026
+      (2,274 events, sha256 shown below).</li>
+  <li><strong>Timestamped the archive on the Bitcoin blockchain</strong> using
+      <a href="https://opentimestamps.org">OpenTimestamps</a>, an open standard that
+      anchors a file's SHA-256 hash into a Bitcoin transaction.</li>
+</ol>
+
+<div class="factbox">
+  <dl>
+    <dt>File</dt><dd>jewell-latest.ics (1,509,891 bytes, 2,274 events)</dd>
+    <dt>SHA-256</dt><dd>c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a</dd>
+    <dt>Timestamped</dt><dd>2026-10-21 ~01:22 UTC, submitted to 4 OpenTimestamps calendar servers</dd>
+    <dt>Proof file</dt><dd>jewell-latest.ics.ots (735 bytes)</dd>
+    <dt>Downloads</dt><dd><a href="jewell-latest.ics">jewell-latest.ics</a> &nbsp;·&nbsp; <a href="jewell-latest.ics.ots">jewell-latest.ics.ots</a></dd>
+  </dl>
+</div>
+
+<p>
+  Nothing about Chairman Jewell is ever written to the blockchain — only the
+  <em>hash</em> of the file is. The timestamp proves one thing, immutably and without
+  any trusted third party: <strong>this exact calendar file existed at this exact point
+  in time.</strong> It cannot be backdated, edited after the fact, or denied later.
+</p>
+
+<h2>Verify It Yourself</h2>
+<p>
+  Don't take our word for it. Anyone with the two files
+  (<code>jewell-latest.ics</code> + <code>jewell-latest.ics.ots</code>) can
+  independently confirm the timestamp against the Bitcoin blockchain:
+</p>
+<pre><code>pip install opentimestamps-client
+
+# confirm the file is untouched
+sha256sum jewell-latest.ics
+# → c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a
+
+# (once the Bitcoin transaction confirms, usually within a day)
+ots upgrade jewell-latest.ics.ots
+
+# verify against the blockchain
+ots verify jewell-latest.ics.ots</code></pre>
+
+<h2>Recreate the Entire Thing</h2>
+<p>The full pipeline, start to finish, is four commands:</p>
+<pre><code># 1. Download the public feed
+curl -O "https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"
+
+# 2. Hash it
+sha256sum basic.ics
+
+# 3. Anchor the hash in Bitcoin
+ots stamp basic.ics
+#    → creates basic.ics.ots
+
+# 4. Later, once confirmed on-chain
+ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
+<p>
+  Repeat the process whenever you like; each snapshot gets its own blockchain
+  timestamp, building a tamper-evident chain of exactly what the calendar said, and when.
+</p>
+
+<h2>Why It Matters</h2>
+<p>
+  Transparency is easy to claim and hard to prove. Mr. Jewell's settings made the data
+  public; OpenTimestamps makes the <em>record</em> of that data permanent. Whether one
+  reads this as a triumph of open government, a cautionary tale about account settings,
+  or both — the blockchain now guarantees that the question can be discussed against a
+  fixed, verifiable record, forever.
+</p>
+
+<footer>
+  <p>
+    Methodology: the calendar was accessed exclusively through Google's public export
+    endpoint, using no credentials or non-public access of any kind. Ownership
+    attribution (jewell.john&#64;gmail.com account header present on 485 invites;
+    in-event signature blocks reading "John Jewell, Chairman, Frederick County Board of
+    Supervisors") is documented in the project's internal methodology memo.
+    An OpenTimestamps proof attests only to a file's existence at a point in time;
+    it is not endorsed by, nor does it publish, the file's contents.
+  </p>
+  <p>Built with curl, sha256, and gratitude. Powered by Bitcoin block headers.</p>
+</footer>
+
+</div>
+</body>
+</html>
