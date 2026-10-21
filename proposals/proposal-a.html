@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>John Jewell: A Study in Radical Transparency</title>
+<style>
+  /* ————————————————————————————————
+     Archival Legal Broadsheet
+     19th-century gazette · court filing · evidence exhibit
+     ———————————————————————————————— */
+  :root {
+    --ink:        #26211a;   /* iron-gall ink */
+    --ink-faint:  #5f5644;   /* faded hand */
+    --paper:      #f4edda;   /* parchment */
+    --paper-deep: #ece2c7;   /* aged margin */
+    --rule:       #a3936f;   /* engraved rule */
+    --rule-faint: #cfc3a4;
+    --seal:       #8a2f24;   /* oxblood stamp ink */
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+    --mono: "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { background:
+      repeating-linear-gradient(90deg, var(--paper-deep) 0 1px, transparent 1px 5px),
+      var(--paper-deep);
+    background-size: auto;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--serif);
+    color: var(--ink);
+    line-height: 1.7;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* the filed sheet itself */
+  .sheet {
+    max-width: 820px;
+    margin: 2.5rem auto;
+    padding: 0 clamp(1.25rem, 5vw, 4rem) 4rem;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255,252,240,.55), transparent 55%),
+      radial-gradient(ellipse at 85% 90%, rgba(120,100,60,.06), transparent 50%),
+      var(--paper);
+    border: 1px solid var(--rule);
+    outline: 3px double var(--rule);
+    outline-offset: 6px;
+    box-shadow: 0 18px 50px rgba(48,38,18,.28), 0 2px 6px rgba(48,38,18,.2);
+  }
+
+  /* ————— masthead ————— */
+  .masthead { text-align: center; padding-top: 2.5rem; margin-bottom: 2.5rem; }
+
+  .masthead .countyline {
+    font-size: .78rem;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: .45rem 0;
+    margin: 0 0 1.75rem;
+  }
+
+  .medal { font-size: 2.6rem; line-height: 1; margin: 0 0 .75rem; }
+
+  h1 {
+    margin: 0 auto .9rem;
+    max-width: 20ch;
+    font-size: clamp(1.9rem, 5.2vw, 3.1rem);
+    line-height: 1.12;
+    font-weight: 700;
+    font-variant: small-caps;
+    letter-spacing: .015em;
+  }
+
+  .subtitle {
+    margin: 0 auto 1.6rem;
+    max-width: 56ch;
+    font-style: italic;
+    font-size: 1.06rem;
+    color: var(--ink-faint);
+  }
+
+  .issueline {
+    display: flex; justify-content: space-between; gap: 1rem;
+    font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-faint);
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: .4rem 0;
+  }
+
+  /* ————— section headings, numbered like legal articles ————— */
+  main { counter-reset: article; }
+
+  h2 {
+    counter-increment: article;
+    margin: 3rem 0 1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--rule-faint);
+    font-size: .95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .22em;
+    color: var(--ink);
+    text-align: center;
+  }
+  h2::before {
+    content: "Article " counter(article, upper-roman);
+    display: block;
+    font-size: .68rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: .3em;
+    text-transform: none;
+    color: var(--seal);
+    margin-bottom: .45rem;
+  }
+  h2::after {
+    content: "";
+    display: block;
+    width: 56px;
+    border-bottom: 3px double var(--rule);
+    margin: .7rem auto 0;
+  }
+
+  p { margin: 0 0 1.1rem; }
+  p + p { text-indent: 1.6em; }
+
+  .lede::first-letter {
+    float: left;
+    font-size: 3.4em;
+    line-height: .82;
+    padding: .08em .12em 0 0;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  strong { font-weight: 700; }
+
+  /* ————— sworn statement (pull quote) ————— */
+  blockquote {
+    margin: 2.2rem auto;
+    padding: 1.2rem 1rem 1rem;
+    max-width: 30em;
+    text-align: center;
+    font-style: italic;
+    font-size: 1.22rem;
+    line-height: 1.55;
+    border-top: 3px double var(--rule);
+    border-bottom: 3px double var(--rule);
+    position: relative;
+  }
+  blockquote::before, blockquote::after {
+    content: "";
+    position: absolute; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    transform: translateX(-50%) rotate(45deg);
+  }
+  blockquote::before { top: -4px; }
+  blockquote::after { bottom: -4px; }
+
+  /* ————— instruments & hash register ————— */
+  code, pre { font-family: var(--mono); font-size: .85em; }
+  code { background: rgba(163,147,111,.18); padding: .12em .38em; border: 1px solid var(--rule-faint); border-radius: 2px; }
+  pre {
+    margin: 1.4rem 0 1.8rem;
+    padding: 1.1rem 1.25rem 1rem;
+    background: rgba(60,48,24,.05);
+    border: 1px solid var(--rule);
+    border-top-width: 3px;
+    overflow-x: auto;
+    line-height: 1.55;
+    font-size: .82rem;
+    position: relative;
+  }
+  pre::before {
+    content: "Instrument";
+    position: absolute; top: -0.72em; left: .9rem;
+    background: var(--paper);
+    padding: 0 .5em;
+    font-family: var(--serif);
+    font-size: .62rem;
+    font-style: italic;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  pre code { background: none; border: none; padding: 0; }
+
+  /* ————— Exhibit A ————— */
+  .exhibit {
+    position: relative;
+    margin: 2.5rem 0;
+    padding: 2.2rem 1.75rem 1.4rem;
+    background: #fbf6e8;
+    border: 1px solid var(--rule);
+    box-shadow: inset 0 0 0 4px #fbf6e8, inset 0 0 0 5px var(--rule-faint);
+  }
+  .exhibit .exhibit-tag {
+    position: absolute; top: -0.9em; left: 1.25rem;
+    background: var(--ink); color: var(--paper);
+    font-size: .7rem; letter-spacing: .3em; text-transform: uppercase;
+    padding: .3em .8em;
+  }
+  .stamp {
+    position: absolute;
+    top: -1.6rem; right: .75rem;
+    width: 118px; height: 118px;
+    transform: rotate(11deg);
+    display: grid; place-items: center;
+    text-align: center;
+    color: var(--seal);
+    border: 2.5px solid var(--seal);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px var(--paper), inset 0 0 0 3.5px var(--seal);
+    opacity: .88;
+    pointer-events: none;
+  }
+  .stamp span {
+    font-size: .58rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    line-height: 1.5;
+    padding: 0 .6rem;
+  }
+  .stamp b { display: block; font-size: .95rem; letter-spacing: .1em; }
+  .exhibit dl { margin: 0; }
+  .exhibit dt {
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .24em;
+    color: var(--ink-faint);
+    margin-top: 1rem;
+  }
+  .exhibit dt:first-child { margin-top: 0; }
+  .exhibit dd {
+    margin: .15rem 0 0;
+    font-family: var(--mono);
+    font-size: .8rem;
+    word-break: break-all;
+    border-bottom: 1px dotted var(--rule-faint);
+    padding-bottom: .35rem;
+  }
+
+  /* ————— record highlights ————— */
+  ul { padding-left: 1.4rem; }
+  ol { padding-left: 1.6rem; }
+  li { margin-bottom: .7rem; padding-left: .25rem; }
+  ul li::marker { content: "❧  "; color: var(--rule); }
+  ol li::marker { font-weight: 700; color: var(--seal); }
+
+  a { color: var(--seal); text-decoration-color: rgba(138,47,36,.4); text-underline-offset: 2px; }
+  a:hover { text-decoration-color: var(--seal); }
+
+  /* ————— footer / colophon ————— */
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 3px double var(--rule);
+    font-size: .82rem;
+    color: var(--ink-faint);
+  }
+  footer p { text-indent: 0; margin: 0 0 .9rem; }
+  footer .colophon {
+    text-align: center;
+    font-style: italic;
+    border-top: 1px solid var(--rule-faint);
+    padding-top: .9rem;
+  }
+
+  /* ————— responsiveness ————— */
+  @media (max-width: 720px) {
+    .sheet { margin: 0; outline: none; border-left: none; border-right: none; box-shadow: none; }
+    .stamp { position: static; transform: rotate(6deg); margin: 0 0 1rem auto; width: 96px; height: 96px; }
+    .issueline { flex-direction: column; gap: .15rem; text-align: center; }
+    p + p { text-indent: 1.2em; }
+  }
+
+  /* ————— print: filed copy ————— */
+  @media print {
+    html { background: none; }
+    body { font-size: 11pt; }
+    .sheet {
+      max-width: none; margin: 0; padding: 0 .25in;
+      background: none; border: none; outline: none; box-shadow: none;
+    }
+    a { color: inherit; text-decoration: none; }
+    pre { border: 1pt solid #000; page-break-inside: avoid; }
+    .exhibit { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; }
+    blockquote { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<header class="masthead">
+  <p class="countyline">Frederick County · Commonwealth of Virginia · Entered into the Public Record</p>
+  <div class="medal">🏆</div>
+  <h1>John Jewell: A Study in Radical Transparency</h1>
+  <p class="subtitle">Recognizing a public servant who published his entire personal calendar to the world — and the Bitcoin blockchain proof that it will never be forgotten.</p>
+  <div class="issueline">
+    <span>No. CCCDLXXIV</span>
+    <span>In the Matter of an Open Calendar</span>
+    <span>October 2026</span>
+  </div>
+</header>
+
+<main>
+
+<h2>An Open-Book Leader</h2>
+<p class="lede">
+  In an era when public officials guard their schedules behind formatting fees and
+  FOIA delays, <strong>John Jewell</strong> — Chairman of the Frederick County (Virginia)
+  Board of Supervisors — has quietly demonstrated a commitment to transparency that most
+  politicians only gesture at in campaign mailers.
+</p>
+<p>
+  His Google Calendar, associated with the account <code>jewell.john&#64;gmail.com</code>,
+  is publicly accessible to anyone on the internet. No password. No records request. No
+  waiting period. Board meetings, planning commission sessions, civic club dinners,
+  Masonic lodge events, personal appointments — all published, in machine-readable form,
+  for any constituent to read.
+</p>
+<blockquote>
+  Most elected officials <em>promise</em> an open-door policy. John Jewell simply left the door open.
+</blockquote>
+
+<h2>What That Actually Means</h2>
+<p>
+  A public Google Calendar isn't just a web page. Because Google exposes every public
+  calendar over a standard <code>.ics</code> (iCalendar) export endpoint, anyone can
+  download the <em>entire feed</em> — every event, every description, every location,
+  every attachment — in a single request:
+</p>
+<pre><code>curl -O "https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"</code></pre>
+<p>
+  As of this writing, that one command returns <strong>2,274 events</strong> in a
+  1.5&nbsp;MB file. Google even helpfully expands recurring events decades into the future.
+</p>
+
+<h2>Highlights from the Record</h2>
+<p>
+  Radical transparency isn't just the big-ticket items. What makes this calendar
+  a landmark of open government is that it publishes <em>everything</em> — the
+  weighty and the mundane, side by side, all verifiable against the
+  blockchain-anchored hash above:
+</p>
+<ul>
+  <li><strong>The day job:</strong> 23 "Board of Supervisors" entries, 13 BOS
+      Work Sessions, 12 BOS Meetings, budget hearings, and joint sessions with
+      the School Board.</li>
+  <li><strong>Civic leadership at every scale:</strong> Masonic lodge meetings,
+      veterans' dinners, candidate forums — and on July 10, 2026, an entry titled
+      <em>"Changing bulb in Church."</em> The Chairman changes the lightbulbs
+      himself.</li>
+  <li><strong>A dining record for the ages:</strong> thirteen publicly logged
+      dinners at Carrabba's between April 2025 and September 2026.</li>
+  <li><strong>26 haircuts,</strong> including "Men's Haircut at Tiffany Reil"
+      on October 14, 2026 — six days before this snapshot was taken. The feed is
+      not just public; it is <em>alive</em>.</li>
+  <li><strong>The annual rites:</strong> an "Anniversary Dinner" block every
+      September, and the spring-returning duty known only as <em>"Pick Up
+      Geraniums."</em></li>
+</ul>
+<p>
+  Every one of these entries sits inside the timestamped file. If a single
+  Carrabba's dinner were edited tomorrow, the hash wouldn't match and the whole
+  record would be provably altered. That is what permanence means.
+</p>
+
+<h2>What We Did (October 2026)</h2>
+<p>
+  To honor this contribution to open government — and to make sure the record of it is
+  preserved permanently — we did two things:
+</p>
+<ol>
+  <li><strong>Archived the full public feed</strong> twice: first on
+      October&nbsp;11,&nbsp;2026 (2,256 events), and again on October&nbsp;21,&nbsp;2026
+      (2,274 events, sha256 shown below).</li>
+  <li><strong>Timestamped the archive on the Bitcoin blockchain</strong> using
+      <a href="https://opentimestamps.org">OpenTimestamps</a>, an open standard that
+      anchors a file's SHA-256 hash into a Bitcoin transaction.</li>
+</ol>
+
+<div class="exhibit">
+  <span class="exhibit-tag">Exhibit A</span>
+  <div class="stamp" aria-hidden="true"><span>Entered · Public Record ·<b>Exhibit A</b>Verified · On Chain</span></div>
+  <dl>
+    <dt>File</dt><dd>jewell-latest.ics (1,509,891 bytes, 2,274 events)</dd>
+    <dt>SHA-256</dt><dd>c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a</dd>
+    <dt>Timestamped</dt><dd>2026-10-21 ~01:22 UTC, submitted to 4 OpenTimestamps calendar servers</dd>
+    <dt>Proof file</dt><dd>jewell-latest.ics.ots (735 bytes)</dd>
+    <dt>Downloads</dt><dd><a href="jewell-latest.ics">jewell-latest.ics</a> &nbsp;·&nbsp; <a href="jewell-latest.ics.ots">jewell-latest.ics.ots</a></dd>
+  </dl>
+</div>
+
+<p>
+  Nothing about Chairman Jewell is ever written to the blockchain — only the
+  <em>hash</em> of the file is. The timestamp proves one thing, immutably and without
+  any trusted third party: <strong>this exact calendar file existed at this exact point
+  in time.</strong> It cannot be backdated, edited after the fact, or denied later.
+</p>
+
+<h2>Verify It Yourself</h2>
+<p>
+  Don't take our word for it. Anyone with the two files
+  (<code>jewell-latest.ics</code> + <code>jewell-latest.ics.ots</code>) can
+  independently confirm the timestamp against the Bitcoin blockchain:
+</p>
+<pre><code>pip install opentimestamps-client
+
+# confirm the file is untouched
+sha256sum jewell-latest.ics
+# → c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a
+
+# (once the Bitcoin transaction confirms, usually within a day)
+ots upgrade jewell-latest.ics.ots
+
+# verify against the blockchain
+ots verify jewell-latest.ics.ots</code></pre>
+
+<h2>Recreate the Entire Thing</h2>
+<p>The full pipeline, start to finish, is four commands:</p>
+<pre><code># 1. Download the public feed
+curl -O "https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"
+
+# 2. Hash it
+sha256sum basic.ics
+
+# 3. Anchor the hash in Bitcoin
+ots stamp basic.ics
+#    → creates basic.ics.ots
+
+# 4. Later, once confirmed on-chain
+ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
+<p>
+  Repeat the process whenever you like; each snapshot gets its own blockchain
+  timestamp, building a tamper-evident chain of exactly what the calendar said, and when.
+</p>
+
+<h2>Why It Matters</h2>
+<p>
+  Transparency is easy to claim and hard to prove. Mr. Jewell's settings made the data
+  public; OpenTimestamps makes the <em>record</em> of that data permanent. Whether one
+  reads this as a triumph of open government, a cautionary tale about account settings,
+  or both — the blockchain now guarantees that the question can be discussed against a
+  fixed, verifiable record, forever.
+</p>
+
+</main>
+
+<footer>
+  <p>
+    Methodology: the calendar was accessed exclusively through Google's public export
+    endpoint, using no credentials or non-public access of any kind. Ownership
+    attribution (jewell.john&#64;gmail.com account header present on 485 invites;
+    in-event signature blocks reading "John Jewell, Chairman, Frederick County Board of
+    Supervisors") is documented in the project's internal methodology memo.
+    An OpenTimestamps proof attests only to a file's existence at a point in time;
+    it is not endorsed by, nor does it publish, the file's contents.
+  </p>
+  <p class="colophon">Built with curl, sha256, and gratitude. Powered by Bitcoin block headers.</p>
+  <p class="colophon">Made with love in the Shenandoah Valley using data center compute. ⚡</p>
+</footer>
+
+</div>
+</body>
+</html>

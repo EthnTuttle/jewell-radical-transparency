@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>John Jewell: A Study in Radical Transparency</title>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg-panel: #10141b;
+    --bg-sink: #07090d;
+    --ink: #e8e6df;          /* body text: ~14:1 on --bg */
+    --muted: #9aa3ad;        /* ~7:1 on --bg */
+    --btc: #f7931a;          /* Bitcoin orange: ~7.4:1 on --bg */
+    --btc-soft: #ffb757;     /* brighter orange for small text on dark */
+    --green: #3ecb8f;
+    --line: #232a35;
+    --line-bright: #37415177;
+    --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, Consolas, 'Liberation Mono', monospace;
+    --glow: 0 0 12px rgba(247, 147, 26, .28);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--mono);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(247,147,26,.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 30%, rgba(62,203,143,.04), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 15.5px;
+  }
+  ::selection { background: rgba(247,147,26,.35); color: #fff; }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+
+  /* ── status bar ── */
+  .statusbar {
+    display: flex; flex-wrap: wrap; gap: .4rem 1.25rem;
+    font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    background: var(--bg-sink);
+    padding: .55rem .9rem; border-radius: 6px;
+    margin-bottom: 2.5rem;
+  }
+  .statusbar .ok { color: var(--green); }
+  .statusbar .btc { color: var(--btc-soft); }
+  .dot::before {
+    content: "●"; margin-right: .4em; font-size: .7em; vertical-align: .1em;
+  }
+  .statusbar .ok.dot::before { color: var(--green); text-shadow: 0 0 8px rgba(62,203,143,.8); }
+  .statusbar .btc.dot::before { color: var(--btc); text-shadow: 0 0 8px rgba(247,147,26,.8); }
+
+  /* ── header ── */
+  header {
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--btc);
+    background: linear-gradient(180deg, rgba(247,147,26,.05), transparent 45%), var(--bg-panel);
+    border-radius: 8px;
+    padding: 2rem 1.75rem 1.75rem;
+    margin-bottom: 2.75rem;
+    position: relative;
+  }
+  .medal {
+    font-size: 2.6rem; text-align: center; margin: 0 0 1rem;
+    filter: drop-shadow(0 0 14px rgba(247,147,26,.5));
+  }
+  h1 {
+    font-size: clamp(1.5rem, 4.5vw, 2.35rem);
+    line-height: 1.2; margin: 0 0 .75rem;
+    letter-spacing: -0.01em;
+    color: #fff;
+    text-shadow: var(--glow);
+  }
+  .subtitle { color: var(--muted); font-size: .95rem; margin: 0; max-width: 46em; }
+  .blocktag {
+    position: absolute; top: .8rem; right: 1rem;
+    font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--btc-soft); opacity: .85;
+  }
+
+  /* ── section headers, explorer-style ── */
+  h2 {
+    font-size: .8rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .18em;
+    color: var(--btc-soft);
+    margin: 3rem 0 1rem;
+    padding: .5rem .8rem;
+    background: var(--bg-sink);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--btc);
+    border-radius: 4px;
+    text-shadow: 0 0 10px rgba(247,147,26,.25);
+  }
+  h2::before { content: "▸ "; color: var(--btc); }
+  h2::after {
+    content: "";
+    display: inline-block; width: .55em; height: 1em;
+    background: var(--btc); vertical-align: text-bottom;
+    margin-left: .5em; opacity: .8;
+    animation: blink 1.15s steps(2, start) infinite;
+  }
+  @keyframes blink { to { visibility: hidden; } }
+  @media (prefers-reduced-motion: reduce) {
+    h2::after { animation: none; }
+  }
+
+  p { margin: 0 0 1.1rem; }
+  strong { color: #fff; }
+  em { color: var(--btc-soft); font-style: italic; }
+
+  blockquote {
+    margin: 1.75rem 0; padding: 1.1rem 1.5rem;
+    border-left: 3px solid var(--btc);
+    background: linear-gradient(90deg, rgba(247,147,26,.08), transparent 70%);
+    font-style: italic; color: var(--ink);
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* ── code & terminals ── */
+  code {
+    font-family: var(--mono);
+    font-size: .88em;
+    background: rgba(247,147,26,.1);
+    color: var(--btc-soft);
+    border: 1px solid rgba(247,147,26,.22);
+    border-radius: 4px;
+    padding: .12em .38em;
+  }
+  pre {
+    position: relative;
+    background: var(--bg-sink);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1.1rem 1.15rem 1rem;
+    overflow-x: auto;
+    line-height: 1.6;
+    font-size: .85rem;
+    margin: 1.4rem 0;
+    box-shadow: inset 0 0 40px rgba(0,0,0,.5);
+  }
+  pre::before {
+    content: "user@transparency:~";
+    display: block;
+    font-size: .65rem; letter-spacing: .1em;
+    color: var(--muted);
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: .5rem; margin-bottom: .8rem;
+  }
+  pre code {
+    background: none; border: none; padding: 0;
+    color: #d7dde4; font-size: inherit;
+  }
+  pre code code, pre code { white-space: pre; }
+
+  /* ── txid treatment for the hash ── */
+  .hash {
+    display: block; word-break: break-all;
+    font-family: var(--mono); font-size: .82rem;
+    color: #ffd9a0;
+    background: var(--bg-sink);
+    border: 1px dashed var(--btc);
+    border-radius: 6px;
+    padding: .8rem 1rem; margin: 1.25rem 0;
+    text-shadow: 0 0 8px rgba(247,147,26,.3);
+  }
+  .hash::before {
+    content: "txid › sha256";
+    display: block; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: .35rem;
+    text-shadow: none;
+  }
+
+  /* ── factbox: block explorer card ── */
+  .factbox {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-top: 1px solid var(--btc);
+    border-radius: 8px;
+    padding: 1.35rem 1.5rem 1rem;
+    margin: 1.75rem 0;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 8px 30px rgba(0,0,0,.45);
+    position: relative;
+  }
+  .factbox::before {
+    content: "EXPLORER / RECORD #2026-10-21";
+    position: absolute; top: -0.62em; left: 1.1rem;
+    background: var(--bg); padding: 0 .5em;
+    font-size: .62rem; letter-spacing: .14em;
+    color: var(--btc-soft);
+  }
+  .factbox dl { margin: 0; }
+  .factbox > div, .factbox dl { display: block; }
+  .factbox dt {
+    font-size: .68rem; text-transform: uppercase; letter-spacing: .14em;
+    color: var(--muted); margin-top: .9rem;
+  }
+  .factbox dt:first-child { margin-top: 0; }
+  .factbox dd {
+    margin: .15rem 0 0; font-family: var(--mono);
+    font-size: .85rem; word-break: break-word;
+    color: var(--ink);
+  }
+  .factbox dd a { word-break: break-all; }
+
+  ol, ul { padding-left: 1.4rem; }
+  li { margin-bottom: .6rem; }
+  li::marker { color: var(--btc); }
+
+  a {
+    color: var(--btc-soft);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(247,147,26,.45);
+    transition: color .15s ease, border-color .15s ease, text-shadow .15s ease;
+  }
+  a:hover, a:focus-visible {
+    color: #fff;
+    border-bottom-color: var(--btc);
+    text-shadow: 0 0 10px rgba(247,147,26,.6);
+  }
+  a:focus-visible { outline: 2px solid var(--btc); outline-offset: 2px; border-radius: 2px; }
+
+  /* ── footer ── */
+  footer {
+    margin-top: 3.5rem; padding-top: 1.5rem;
+    border-top: 1px dashed var(--line);
+    font-size: .8rem; color: var(--muted);
+  }
+  footer p { margin: 0 0 .9rem; }
+
+  /* ── decorative hex fringe (divider) ── */
+  .hexfall {
+    text-align: center; color: var(--line-bright);
+    font-size: .68rem; letter-spacing: .3em;
+    margin: 2.25rem 0 0;
+    user-select: none; overflow: hidden; white-space: nowrap;
+  }
+
+  @media (max-width: 520px) {
+    body { font-size: 14.5px; }
+    header { padding: 1.5rem 1.1rem 1.25rem; }
+    .blocktag { position: static; display: block; margin-bottom: .5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="statusbar" aria-label="Site status">
+  <span class="ok dot">node synced</span>
+  <span class="btc dot">₿ mainnet</span>
+  <span class="dot">proof: ots</span>
+  <span class="dot">trust: zero</span>
+</nav>
+
+<header>
+  <span class="blocktag">[ genesis record ]</span>
+  <div class="medal">🏆</div>
+  <h1>John Jewell: A Study in Radical Transparency</h1>
+  <p class="subtitle">Recognizing a public servant who published his entire personal calendar to the world — and the Bitcoin blockchain proof that it will never be forgotten.</p>
+</header>
+
+<h2>An Open-Book Leader</h2>
+<p>
+  In an era when public officials guard their schedules behind formatting fees and
+  FOIA delays, <strong>John Jewell</strong> — Chairman of the Frederick County (Virginia)
+  Board of Supervisors — has quietly demonstrated a commitment to transparency that most
+  politicians only gesture at in campaign mailers.
+</p>
+<p>
+  His Google Calendar, associated with the account <code>jewell.john&#64;gmail.com</code>,
+  is publicly accessible to anyone on the internet. No password. No records request. No
+  waiting period. Board meetings, planning commission sessions, civic club dinners,
+  Masonic lodge events, personal appointments — all published, in machine-readable form,
+  for any constituent to read.
+</p>
+<blockquote>
+  Most elected officials <em>promise</em> an open-door policy. John Jewell simply left the door open.
+</blockquote>
+
+<h2>What That Actually Means</h2>
+<p>
+  A public Google Calendar isn't just a web page. Because Google exposes every public
+  calendar over a standard <code>.ics</code> (iCalendar) export endpoint, anyone can
+  download the <em>entire feed</em> — every event, every description, every location,
+  every attachment — in a single request:
+</p>
+<pre><code>curl -O "https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"</code></pre>
+<p>
+  As of this writing, that one command returns <strong>2,274 events</strong> in a
+  1.5&nbsp;MB file. Google even helpfully expands recurring events decades into the future.
+</p>
+
+<div class="hexfall" aria-hidden="true">c6 37 2c 68 44 40 b9 e8 · 45 58 70 84 10 5d 8c 73 · d2 65 2c 36 33 89 fd b6</div>
+
+<h2>Highlights from the Record</h2>
+<p>
+  Radical transparency isn't just the big-ticket items. What makes this calendar
+  a landmark of open government is that it publishes <em>everything</em> — the
+  weighty and the mundane, side by side, all verifiable against the
+  blockchain-anchored hash above:
+</p>
+<ul>
+  <li><strong>The day job:</strong> 23 "Board of Supervisors" entries, 13 BOS
+      Work Sessions, 12 BOS Meetings, budget hearings, and joint sessions with
+      the School Board.</li>
+  <li><strong>Civic leadership at every scale:</strong> Masonic lodge meetings,
+      veterans' dinners, candidate forums — and on July 10, 2026, an entry titled
+      <em>"Changing bulb in Church."</em> The Chairman changes the lightbulbs
+      himself.</li>
+  <li><strong>A dining record for the ages:</strong> thirteen publicly logged
+      dinners at Carrabba's between April 2025 and September 2026.</li>
+  <li><strong>26 haircuts,</strong> including "Men's Haircut at Tiffany Reil"
+      on October 14, 2026 — six days before this snapshot was taken. The feed is
+      not just public; it is <em>alive</em>.</li>
+  <li><strong>The annual rites:</strong> an "Anniversary Dinner" block every
+      September, and the spring-returning duty known only as <em>"Pick Up
+      Geraniums."</em></li>
+</ul>
+<p>
+  Every one of these entries sits inside the timestamped file. If a single
+  Carrabba's dinner were edited tomorrow, the hash wouldn't match and the whole
+  record would be provably altered. That is what permanence means.
+</p>
+
+<h2>What We Did (October 2026)</h2>
+<p>
+  To honor this contribution to open government — and to make sure the record of it is
+  preserved permanently — we did two things:
+</p>
+<ol>
+  <li><strong>Archived the full public feed</strong> twice: first on
+      October&nbsp;11,&nbsp;2026 (2,256 events), and again on October&nbsp;21,&nbsp;2026
+      (2,274 events, sha256 shown below).</li>
+  <li><strong>Timestamped the archive on the Bitcoin blockchain</strong> using
+      <a href="https://opentimestamps.org">OpenTimestamps</a>, an open standard that
+      anchors a file's SHA-256 hash into a Bitcoin transaction.</li>
+</ol>
+
+<div class="factbox">
+  <dl>
+    <dt>File</dt><dd>jewell-latest.ics (1,509,891 bytes, 2,274 events)</dd>
+    <dt>SHA-256</dt><dd><span class="hash" style="margin:.35rem 0 0">c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a</span></dd>
+    <dt>Timestamped</dt><dd>2026-10-21 ~01:22 UTC, submitted to 4 OpenTimestamps calendar servers</dd>
+    <dt>Proof file</dt><dd>jewell-latest.ics.ots (735 bytes)</dd>
+    <dt>Downloads</dt><dd><a href="jewell-latest.ics">jewell-latest.ics</a> &nbsp;·&nbsp; <a href="jewell-latest.ics.ots">jewell-latest.ics.ots</a></dd>
+  </dl>
+</div>
+
+<p>
+  Nothing about Chairman Jewell is ever written to the blockchain — only the
+  <em>hash</em> of the file is. The timestamp proves one thing, immutably and without
+  any trusted third party: <strong>this exact calendar file existed at this exact point
+  in time.</strong> It cannot be backdated, edited after the fact, or denied later.
+</p>
+
+<h2>Verify It Yourself</h2>
+<p>
+  Don't take our word for it. Anyone with the two files
+  (<code>jewell-latest.ics</code> + <code>jewell-latest.ics.ots</code>) can
+  independently confirm the timestamp against the Bitcoin blockchain:
+</p>
+<pre><code>pip install opentimestamps-client
+
+# confirm the file is untouched
+sha256sum jewell-latest.ics
+# → c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a
+
+# (once the Bitcoin transaction confirms, usually within a day)
+ots upgrade jewell-latest.ics.ots
+
+# verify against the blockchain
+ots verify jewell-latest.ics.ots</code></pre>
+
+<h2>Recreate the Entire Thing</h2>
+<p>The full pipeline, start to finish, is four commands:</p>
+<pre><code># 1. Download the public feed
+curl -O "https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"
+
+# 2. Hash it
+sha256sum basic.ics
+
+# 3. Anchor the hash in Bitcoin
+ots stamp basic.ics
+#    → creates basic.ics.ots
+
+# 4. Later, once confirmed on-chain
+ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
+<p>
+  Repeat the process whenever you like; each snapshot gets its own blockchain
+  timestamp, building a tamper-evident chain of exactly what the calendar said, and when.
+</p>
+
+<h2>Why It Matters</h2>
+<p>
+  Transparency is easy to claim and hard to prove. Mr. Jewell's settings made the data
+  public; OpenTimestamps makes the <em>record</em> of that data permanent. Whether one
+  reads this as a triumph of open government, a cautionary tale about account settings,
+  or both — the blockchain now guarantees that the question can be discussed against a
+  fixed, verifiable record, forever.
+</p>
+
+<footer>
+  <p>
+    Methodology: the calendar was accessed exclusively through Google's public export
+    endpoint, using no credentials or non-public access of any kind. Ownership
+    attribution (jewell.john&#64;gmail.com account header present on 485 invites;
+    in-event signature blocks reading "John Jewell, Chairman, Frederick County Board of
+    Supervisors") is documented in the project's internal methodology memo.
+    An OpenTimestamps proof attests only to a file's existence at a point in time;
+    it is not endorsed by, nor does it publish, the file's contents.
+  </p>
+  <p>Built with curl, sha256, and gratitude. Powered by Bitcoin block headers.</p>
+  <p>Made with love in the Shenandoah Valley using data center compute. ⚡</p>
+</footer>
+
+</div>
+</body>
+</html>

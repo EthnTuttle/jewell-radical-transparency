@@ -4,79 +4,341 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>John Jewell: A Study in Radical Transparency</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
 <style>
+  /* ————————————————————————————————
+     Archival Legal Broadsheet
+     19th-century gazette · court filing · evidence exhibit
+     ———————————————————————————————— */
   :root {
-    --ink: #1a1a2e;
-    --accent: #f7931a; /* Bitcoin orange, naturally */
-    --paper: #fdfbf7;
-    --muted: #6b6b7d;
+    --ink:        #26211a;   /* iron-gall ink */
+    --ink-faint:  #5f5644;   /* faded hand */
+    --paper:      #f4edda;   /* parchment */
+    --paper-deep: #ece2c7;   /* aged margin */
+    --rule:       #a3936f;   /* engraved rule */
+    --rule-faint: #cfc3a4;
+    --seal:       #8a2f24;   /* oxblood stamp ink */
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+    --mono: "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
   }
+
   * { box-sizing: border-box; }
+
+  html { background:
+      repeating-linear-gradient(90deg, var(--paper-deep) 0 1px, transparent 1px 5px),
+      var(--paper-deep);
+    background-size: auto;
+  }
+
   body {
     margin: 0;
-    font-family: Georgia, 'Times New Roman', serif;
-    background: var(--paper);
+    font-family: var(--serif);
     color: var(--ink);
-    line-height: 1.65;
+    line-height: 1.7;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
-  header { border-bottom: 3px double var(--ink); padding-bottom: 1.5rem; margin-bottom: 2.5rem; }
-  h1 { font-size: 2.4rem; line-height: 1.15; margin: 0 0 .5rem; letter-spacing: -0.01em; }
-  .subtitle { font-style: italic; color: var(--muted); font-size: 1.1rem; }
+
+  /* the filed sheet itself */
+  .sheet {
+    max-width: 820px;
+    margin: 2.5rem auto;
+    padding: 0 clamp(1.25rem, 5vw, 4rem) 4rem;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255,252,240,.55), transparent 55%),
+      radial-gradient(ellipse at 85% 90%, rgba(120,100,60,.06), transparent 50%),
+      var(--paper);
+    border: 1px solid var(--rule);
+    outline: 3px double var(--rule);
+    outline-offset: 6px;
+    box-shadow: 0 18px 50px rgba(48,38,18,.28), 0 2px 6px rgba(48,38,18,.2);
+  }
+
+  /* ————— masthead ————— */
+  .masthead { text-align: center; padding-top: 2.5rem; margin-bottom: 2.5rem; }
+
+  .masthead .countyline {
+    font-size: .78rem;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: .45rem 0;
+    margin: 0 0 1.75rem;
+  }
+
+  .medal { font-size: 2.6rem; line-height: 1; margin: 0 0 .75rem; }
+
+  h1 {
+    margin: 0 auto .9rem;
+    max-width: 20ch;
+    font-size: clamp(1.9rem, 5.2vw, 3.1rem);
+    line-height: 1.12;
+    font-weight: 700;
+    font-variant: small-caps;
+    letter-spacing: .015em;
+  }
+
+  .subtitle {
+    margin: 0 auto 1.6rem;
+    max-width: 56ch;
+    font-style: italic;
+    font-size: 1.06rem;
+    color: var(--ink-faint);
+  }
+
+  .issueline {
+    display: flex; justify-content: space-between; gap: 1rem;
+    font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-faint);
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: .4rem 0;
+  }
+
+  /* ————— section headings, numbered like legal articles ————— */
+  main { counter-reset: article; }
+
   h2 {
-    font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
-    font-size: .85rem; text-transform: uppercase; letter-spacing: .12em;
-    color: var(--accent); margin: 2.5rem 0 .75rem;
+    counter-increment: article;
+    margin: 3rem 0 1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--rule-faint);
+    font-size: .95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .22em;
+    color: var(--ink);
+    text-align: center;
   }
-  p { margin: 0 0 1rem; }
+  h2::before {
+    content: "Article " counter(article, upper-roman);
+    display: block;
+    font-size: .68rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: .3em;
+    text-transform: none;
+    color: var(--seal);
+    margin-bottom: .45rem;
+  }
+  h2::after {
+    content: "";
+    display: block;
+    width: 56px;
+    border-bottom: 3px double var(--rule);
+    margin: .7rem auto 0;
+  }
+
+  p { margin: 0 0 1.1rem; }
+  p + p { text-indent: 1.6em; }
+
+  .lede::first-letter {
+    float: left;
+    font-size: 3.4em;
+    line-height: .82;
+    padding: .08em .12em 0 0;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  strong { font-weight: 700; }
+
+  /* ————— sworn statement (pull quote) ————— */
   blockquote {
-    margin: 1.5rem 0; padding: 1rem 1.5rem;
-    border-left: 4px solid var(--accent);
-    background: #fff8ef; font-style: italic;
+    margin: 2.2rem auto;
+    padding: 1.2rem 1rem 1rem;
+    max-width: 30em;
+    text-align: center;
+    font-style: italic;
+    font-size: 1.22rem;
+    line-height: 1.55;
+    border-top: 3px double var(--rule);
+    border-bottom: 3px double var(--rule);
+    position: relative;
   }
-  code, pre {
-    font-family: 'SF Mono', Menlo, Consolas, monospace;
-    font-size: .85em; background: #f0eee7;
-    border-radius: 4px;
+  blockquote::before, blockquote::after {
+    content: "";
+    position: absolute; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    transform: translateX(-50%) rotate(45deg);
   }
-  code { padding: .15em .4em; }
-  pre { padding: 1rem; overflow-x: auto; line-height: 1.5; border: 1px solid #e2dfd4; }
-  pre code { background: none; padding: 0; }
-  .hash {
-    display: block; word-break: break-all;
-    font-family: Menlo, Consolas, monospace; font-size: .8rem;
-    background: #fff; border: 1px dashed var(--accent);
-    padding: .75rem 1rem; border-radius: 6px; margin: 1rem 0;
+  blockquote::before { top: -4px; }
+  blockquote::after { bottom: -4px; }
+
+  /* ————— in-browser verification ————— */
+  .vbtn {
+    font-family: var(--serif);
+    font-size: .85rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    padding: .7em 1.6em;
+    cursor: pointer;
+    margin: .5rem 0 1.2rem;
   }
-  .factbox {
-    background: #fff; border: 1px solid #e2dfd4; border-radius: 8px;
-    padding: 1.25rem 1.5rem; margin: 1.5rem 0;
+  .vbtn:hover { background: var(--seal); border-color: var(--seal); }
+  .vbtn:disabled { opacity: .55; cursor: wait; }
+  #ots-out { white-space: pre-wrap; word-break: break-word; }
+
+  /* ————— instruments & hash register ————— */
+  code, pre { font-family: var(--mono); font-size: .85em; }
+  code { background: rgba(163,147,111,.18); padding: .12em .38em; border: 1px solid var(--rule-faint); border-radius: 2px; }
+  pre {
+    margin: 1.4rem 0 1.8rem;
+    padding: 1.1rem 1.25rem 1rem;
+    background: rgba(60,48,24,.05);
+    border: 1px solid var(--rule);
+    border-top-width: 3px;
+    overflow-x: auto;
+    line-height: 1.55;
+    font-size: .82rem;
+    position: relative;
   }
-  .factbox dt { font-weight: bold; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-  .factbox dd { margin: 0 0 1rem; font-family: Menlo, Consolas, monospace; font-size: .85rem; word-break: break-word; }
-  .factbox dd:last-child { margin-bottom: 0; }
-  .medal { font-size: 3rem; text-align: center; margin: 1rem 0 2rem; }
-  ol, ul { padding-left: 1.5rem; }
-  li { margin-bottom: .5rem; }
+  pre::before {
+    content: "Instrument";
+    position: absolute; top: -0.72em; left: .9rem;
+    background: var(--paper);
+    padding: 0 .5em;
+    font-family: var(--serif);
+    font-size: .62rem;
+    font-style: italic;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  pre code { background: none; border: none; padding: 0; }
+
+  /* ————— Exhibit A ————— */
+  .exhibit {
+    position: relative;
+    margin: 2.5rem 0;
+    padding: 2.2rem 1.75rem 1.4rem;
+    background: #fbf6e8;
+    border: 1px solid var(--rule);
+    box-shadow: inset 0 0 0 4px #fbf6e8, inset 0 0 0 5px var(--rule-faint);
+  }
+  .exhibit .exhibit-tag {
+    position: absolute; top: -0.9em; left: 1.25rem;
+    background: var(--ink); color: var(--paper);
+    font-size: .7rem; letter-spacing: .3em; text-transform: uppercase;
+    padding: .3em .8em;
+  }
+  .stamp {
+    position: absolute;
+    top: -1.6rem; right: .75rem;
+    width: 118px; height: 118px;
+    transform: rotate(11deg);
+    display: grid; place-items: center;
+    text-align: center;
+    color: var(--seal);
+    border: 2.5px solid var(--seal);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px var(--paper), inset 0 0 0 3.5px var(--seal);
+    opacity: .88;
+    pointer-events: none;
+  }
+  .stamp span {
+    font-size: .58rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    line-height: 1.5;
+    padding: 0 .6rem;
+  }
+  .stamp b { display: block; font-size: .95rem; letter-spacing: .1em; }
+  .exhibit dl { margin: 0; }
+  .exhibit dt {
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .24em;
+    color: var(--ink-faint);
+    margin-top: 1rem;
+  }
+  .exhibit dt:first-child { margin-top: 0; }
+  .exhibit dd {
+    margin: .15rem 0 0;
+    font-family: var(--mono);
+    font-size: .8rem;
+    word-break: break-all;
+    border-bottom: 1px dotted var(--rule-faint);
+    padding-bottom: .35rem;
+  }
+
+  /* ————— record highlights ————— */
+  ul { padding-left: 1.4rem; }
+  ol { padding-left: 1.6rem; }
+  li { margin-bottom: .7rem; padding-left: .25rem; }
+  ul li::marker { content: "❧  "; color: var(--rule); }
+  ol li::marker { font-weight: 700; color: var(--seal); }
+
+  a { color: var(--seal); text-decoration-color: rgba(138,47,36,.4); text-underline-offset: 2px; }
+  a:hover { text-decoration-color: var(--seal); }
+  a:focus-visible { outline: 2px solid var(--seal); outline-offset: 3px; border-radius: 2px; text-decoration: none; }
+
+  /* ————— footer / colophon ————— */
   footer {
-    margin-top: 3.5rem; padding-top: 1.5rem;
-    border-top: 1px solid #dcd8cc;
-    font-size: .85rem; color: var(--muted);
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 3px double var(--rule);
+    font-size: .82rem;
+    color: var(--ink-faint);
   }
-  a { color: var(--accent); }
+  footer p { text-indent: 0; margin: 0 0 .9rem; }
+  footer .colophon {
+    text-align: center;
+    font-style: italic;
+    border-top: 1px solid var(--rule-faint);
+    padding-top: .9rem;
+  }
+
+  /* ————— responsiveness ————— */
+  @media (max-width: 720px) {
+    .sheet { margin: 0; outline: none; border-left: none; border-right: none; box-shadow: none; }
+    .stamp { position: static; transform: rotate(6deg); margin: 0 0 1rem auto; width: 96px; height: 96px; }
+    .issueline { flex-direction: column; gap: .15rem; text-align: center; }
+    p + p { text-indent: 1.2em; }
+  }
+
+  /* ————— print: filed copy ————— */
+  @media print {
+    html { background: none; }
+    body { font-size: 11pt; }
+    .sheet {
+      max-width: none; margin: 0; padding: 0 .25in;
+      background: none; border: none; outline: none; box-shadow: none;
+    }
+    a { color: inherit; text-decoration: none; }
+    pre { border: 1pt solid #000; page-break-inside: avoid; }
+    .exhibit { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; }
+    blockquote { page-break-inside: avoid; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="sheet">
 
-<header>
+<header class="masthead">
+  <p class="countyline">Frederick County · Commonwealth of Virginia · Entered into the Public Record</p>
   <div class="medal">🏆</div>
   <h1>John Jewell: A Study in Radical Transparency</h1>
   <p class="subtitle">Recognizing a public servant who published his entire personal calendar to the world — and the Bitcoin blockchain proof that it will never be forgotten.</p>
+  <div class="issueline">
+    <span>No. CCCDLXXIV</span>
+    <span>In the Matter of an Open Calendar</span>
+    <span>October 2026</span>
+  </div>
 </header>
 
+<main>
+
 <h2>An Open-Book Leader</h2>
-<p>
+<p class="lede">
   In an era when public officials guard their schedules behind formatting fees and
   FOIA delays, <strong>John Jewell</strong> — Chairman of the Frederick County (Virginia)
   Board of Supervisors — has quietly demonstrated a commitment to transparency that most
@@ -150,7 +412,9 @@
       anchors a file's SHA-256 hash into a Bitcoin transaction.</li>
 </ol>
 
-<div class="factbox">
+<div class="exhibit">
+  <span class="exhibit-tag">Exhibit A</span>
+  <div class="stamp" aria-hidden="true"><span>Entered · Public Record ·<b>Exhibit A</b>Verified · On Chain</span></div>
   <dl>
     <dt>File</dt><dd>jewell-latest.ics (1,509,891 bytes, 2,274 events)</dd>
     <dt>SHA-256</dt><dd>c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a</dd>
@@ -185,6 +449,15 @@ ots upgrade jewell-latest.ics.ots
 # verify against the blockchain
 ots verify jewell-latest.ics.ots</code></pre>
 
+<p>
+  <strong>No terminal handy?</strong> This page carries the official OpenTimestamps
+  JavaScript library and can perform the same attestation entirely inside your
+  browser. The file is hashed locally and never uploaded anywhere; the only network
+  calls are to the public timestamp calendars and a public Bitcoin block explorer.
+</p>
+<button class="vbtn" id="ots-btn" type="button">Inspect the Seal in This Browser</button>
+<pre id="ots-out" aria-live="polite"><code>Seal not yet inspected. Press the button above.</code></pre>
+
 <h2>Recreate the Entire Thing</h2>
 <p>The full pipeline, start to finish, is four commands:</p>
 <pre><code># 1. Download the public feed
@@ -213,6 +486,8 @@ ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
   fixed, verifiable record, forever.
 </p>
 
+</main>
+
 <footer>
   <p>
     Methodology: the calendar was accessed exclusively through Google's public export
@@ -223,10 +498,67 @@ ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
     An OpenTimestamps proof attests only to a file's existence at a point in time;
     it is not endorsed by, nor does it publish, the file's contents.
   </p>
-  <p>Built with curl, sha256, and gratitude. Powered by Bitcoin block headers.</p>
-  <p>Made with love in the Shenandoah Valley using data center compute. ⚡</p>
+  <p class="colophon">Built with curl, sha256, and gratitude. Powered by Bitcoin block headers.</p>
+  <p class="colophon">Made with love in the Shenandoah Valley using data center compute. ⚡</p>
 </footer>
 
 </div>
+<script>
+(function () {
+  const btn = document.getElementById('ots-btn');
+  const out = document.getElementById('ots-out').firstElementChild;
+  const EXPECTED = 'c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a';
+  const say = (m) => { out.textContent = m; btn.textContent = 'Inspect the Seal in This Browser'; btn.disabled = false; };
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true; btn.textContent = 'Inspecting…';
+    out.textContent = 'Loading the OpenTimestamps library…';
+    try {
+      if (!window.OpenTimestamps) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'vendor/opentimestamps.min.js';
+          s.onload = res; s.onerror = () => rej(new Error('could not load vendor/opentimestamps.min.js'));
+          document.head.appendChild(s);
+        });
+      }
+      out.textContent = 'Fetching jewell-latest.ics and hashing it locally (SHA-256)…';
+      const icsBuf = await (await fetch('jewell-latest.ics')).arrayBuffer();
+      const hashBuf = await crypto.subtle.digest('SHA-256', icsBuf);
+      const hex = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      if (hex !== EXPECTED) throw new Error('served file hash mismatch:\n  got ' + hex + '\n  want ' + EXPECTED);
+
+      out.textContent = '✔ File integrity confirmed (SHA-256 matches Exhibit A)\nQuerying timestamp calendars and Bitcoin block explorer…';
+      const otsBuf = await (await fetch('jewell-latest.ics.ots')).arrayBuffer();
+      const detachedOts  = OpenTimestamps.DetachedTimestampFile.deserialize(otsBuf);
+      const bytes = Array.from(new Uint8Array(icsBuf));
+      const detachedFile = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), bytes);
+      const opts = { timeout: 10000 };
+      try { await OpenTimestamps.upgrade(detachedOts, opts); } catch (e) { /* pending calendars are fine */ }
+      try {
+        const results = await OpenTimestamps.verify(detachedOts, detachedFile, opts);
+        if (results && results.bitcoin) {
+          const d = new Date(results.bitcoin.timestamp * 1000);
+          say('✔✔ SEAL VERIFIED.\n\nBitcoin block #' + results.bitcoin.height +
+              ' attests that this exact file existed as of\n' + d.toUTCString() +
+              '\n\nChecked entirely in your browser. No upload, no middleman.' +
+              '\n(Lite-client verification: the block data came from a public explorer API.)');
+        } else {
+          throw new Error('PendingAttestation');
+        }
+      } catch (e) {
+        if (/PendingAttestation|unconfirmed|pending/i.test(String(e))) {
+          say('✔ File integrity confirmed (SHA-256 matches Exhibit A)\n' +
+              '⏳ The Bitcoin anchoring transaction is still pending confirmation.\n' +
+              '   The proof is properly formed and lodged with four calendar servers;\n' +
+              '   check back in a day or so and this seal will verify on-chain.');
+        } else { throw e; }
+      }
+    } catch (err) {
+      say('✘ Inspection failed:\n' + (err && err.message ? err.message : String(err)));
+    }
+  });
+})();
+</script>
 </body>
 </html>

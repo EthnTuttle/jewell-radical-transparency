@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>John Jewell: A Study in Radical Transparency</title>
+<style>
+  :root {
+    /* Civic open-data palette */
+    --ink: #0f172a;          /* slate-900 — body text */
+    --ink-soft: #334155;     /* slate-700 — secondary text */
+    --muted: #475569;        /* slate-600 — captions/labels (AA on white) */
+    --bg: #f8fafc;           /* slate-50 — page background */
+    --card: #ffffff;
+    --border: #e2e8f0;       /* slate-200 */
+    --brand: #1d4ed8;        /* civic blue — links */
+    --brand-dark: #1e40af;
+    --green: #166534;        /* verified chip text */
+    --green-bg: #dcfce7;     /* verified chip background */
+    --green-border: #86efac;
+    --btc: #f7931a;          /* Bitcoin orange (decorative/large) */
+    --btc-text: #8a4b00;     /* darker orange for AA text use */
+    --code-bg: #0f172a;
+    --code-ink: #e2e8f0;
+    --radius: 12px;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+  }
+
+  /* ---- Accessibility helpers ---- */
+  .skip-link {
+    position: absolute; left: 1rem; top: -4rem;
+    background: var(--brand); color: #fff;
+    padding: .6rem 1rem; border-radius: 8px;
+    font-weight: 600; z-index: 50; text-decoration: none;
+    transition: top .15s ease;
+  }
+  .skip-link:focus { top: 1rem; }
+  a { color: var(--brand); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { color: var(--brand-dark); }
+  a:focus-visible, button:focus-visible {
+    outline: 3px solid var(--btc);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; scroll-behavior: auto !important; }
+  }
+  :focus { outline-color: var(--btc); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.25rem 4rem; }
+  .prose { max-width: 46rem; }
+  p { margin: 0 0 1rem; }
+
+  /* ---- Portal masthead ---- */
+  .masthead {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+  .masthead-inner {
+    max-width: 1080px; margin: 0 auto;
+    padding: .9rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+  }
+  .agency {
+    display: flex; align-items: center; gap: .65rem;
+    font-weight: 700; letter-spacing: .02em; font-size: .95rem;
+    color: var(--ink); text-decoration: none;
+  }
+  .agency .seal {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--brand);
+    display: grid; place-items: center;
+    color: #fff; font-size: 1rem;
+    flex: 0 0 auto;
+  }
+  .masthead .tag {
+    font-size: .8rem; color: var(--muted);
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--btc); display: inline-block; }
+
+  /* ---- Hero ---- */
+  .hero {
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .kicker {
+    font-size: .78rem; font-weight: 700; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--btc-text);
+    margin: 0 0 .75rem; display: flex; align-items: center; gap: .5rem;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 4vw, 2.9rem);
+    line-height: 1.12; letter-spacing: -0.02em;
+    margin: 0 0 .9rem; font-weight: 800;
+  }
+  .subtitle {
+    font-size: 1.12rem; color: var(--ink-soft);
+    max-width: 42rem; margin: 0 0 1.5rem;
+  }
+  .chip-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+  .chip {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-size: .8rem; font-weight: 600;
+    padding: .35rem .8rem; border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .chip-verified {
+    background: var(--green-bg); color: var(--green);
+    border-color: var(--green-border);
+  }
+  .chip-neutral {
+    background: #fff; color: var(--ink-soft); border-color: var(--border);
+  }
+  .chip svg { flex: 0 0 auto; }
+
+  blockquote {
+    margin: 1.75rem 0; padding: 1.25rem 1.5rem;
+    background: #fff; border: 1px solid var(--border);
+    border-left: 4px solid var(--brand);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 1.1rem; font-weight: 500; color: var(--ink);
+  }
+
+  /* ---- Stat cards ---- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 2.5rem 0 0;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.15rem 1.25rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+  }
+  .stat .num {
+    font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.1; font-variant-numeric: tabular-nums;
+  }
+  .stat .num .unit { font-size: 1.1rem; color: var(--ink-soft); font-weight: 700; }
+  .stat .lbl {
+    margin-top: .35rem; font-size: .8rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
+  }
+  .stat.btc { border-top: 3px solid var(--btc); }
+  .stat.green { border-top: 3px solid #22c55e; }
+  .stat.blue { border-top: 3px solid var(--brand); }
+
+  /* ---- Sections ---- */
+  section { padding-top: 3rem; }
+  h2 {
+    font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em;
+    margin: 0 0 1rem; display: flex; align-items: baseline; gap: .6rem;
+  }
+  h2 .idx {
+    font-family: var(--mono); font-size: .8rem; color: var(--btc-text);
+    font-weight: 600; letter-spacing: .05em;
+  }
+
+  /* ---- Code ---- */
+  code {
+    font-family: var(--mono); font-size: .85em;
+    background: #eef2f7; color: #0f2a5c;
+    padding: .15em .45em; border-radius: 5px;
+  }
+  pre {
+    font-family: var(--mono); font-size: .85rem;
+    background: var(--code-bg); color: var(--code-ink);
+    padding: 1.1rem 1.25rem; border-radius: var(--radius);
+    overflow-x: auto; line-height: 1.6; margin: 1.25rem 0;
+    border: 1px solid #1e293b;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+  /* ---- Hash block ---- */
+  .hash-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .hash-card .hash-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; flex-wrap: wrap; margin-bottom: .6rem;
+  }
+  .hash-card .hash-title {
+    font-size: .8rem; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .hash {
+    display: block; word-break: break-all;
+    font-family: var(--mono); font-size: .85rem;
+    background: #f1f5f9; border: 1px solid var(--border);
+    padding: .8rem 1rem; border-radius: 8px;
+  }
+
+  /* ---- Highlights timeline ---- */
+  .timeline {
+    list-style: none; margin: 1.75rem 0 0; padding: 0;
+    position: relative; max-width: 44rem;
+  }
+  .timeline::before {
+    content: ""; position: absolute;
+    left: 11px; top: 8px; bottom: 8px;
+    width: 2px; background: var(--border);
+  }
+  .timeline li {
+    position: relative; padding: 0 0 1.5rem 3rem; margin: 0;
+  }
+  .timeline li:last-child { padding-bottom: 0; }
+  .timeline .t-dot {
+    position: absolute; left: 0; top: .15rem;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--brand);
+    display: grid; place-items: center;
+    font-size: .72rem; font-weight: 700; color: var(--brand);
+    font-family: var(--mono);
+  }
+  .timeline .t-dot.btc { border-color: var(--btc); color: var(--btc-text); }
+  .timeline .t-dot.green { border-color: #16a34a; color: var(--green); }
+  .timeline h3 {
+    margin: 0 0 .3rem; font-size: 1.02rem; font-weight: 700;
+  }
+  .timeline p { margin: 0; color: var(--ink-soft); }
+  .timeline p strong { color: var(--ink); }
+
+  ol.steps { padding-left: 1.5rem; }
+  ol.steps li, ul li { margin-bottom: .5rem; }
+
+  /* ---- Fact box / record card ---- */
+  .factbox {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); margin: 1.75rem 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    overflow: hidden;
+  }
+  .factbox .fb-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; flex-wrap: wrap;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #fbfdff, #fff);
+  }
+  .factbox .fb-title { font-weight: 700; font-size: .95rem; }
+  .factbox dl { margin: 0; padding: .25rem 0; }
+  .factbox .row {
+    display: grid; grid-template-columns: minmax(120px, 180px) 1fr;
+    gap: .5rem 1.25rem;
+    padding: .85rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .factbox .row:last-child { border-bottom: 0; }
+  .factbox dt {
+    font-size: .78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted);
+  }
+  .factbox dd {
+    margin: 0; font-family: var(--mono); font-size: .85rem;
+    word-break: break-word; color: var(--ink);
+  }
+  @media (max-width: 540px) {
+    .factbox .row { grid-template-columns: 1fr; gap: .2rem; }
+  }
+
+  /* ---- Download buttons ---- */
+  .btn-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+  .btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font: inherit; font-size: .9rem; font-weight: 600;
+    padding: .6rem 1.1rem; border-radius: 9px;
+    border: 1px solid var(--border); background: #fff;
+    color: var(--brand); text-decoration: none;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .btn:hover { background: #f1f5f9; border-color: #cbd5e1; color: var(--brand-dark); }
+  .btn.btc { border-color: #fbd9a8; color: var(--btc-text); }
+  .btn.btc:hover { background: #fff7ec; }
+  .btn .size { font-weight: 400; color: var(--muted); font-size: .8rem; }
+
+  /* ---- Footer ---- */
+  footer {
+    margin-top: 4rem; padding: 2rem 0 1rem;
+    border-top: 1px solid var(--border);
+    font-size: .85rem; color: var(--muted);
+  }
+  footer p { margin: 0 0 .9rem; max-width: 46rem; }
+
+  @media (max-width: 640px) {
+    .hero { padding: 2rem 0 1.5rem; }
+    section { padding-top: 2.25rem; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Portal masthead -->
+<div class="masthead">
+  <div class="masthead-inner">
+    <a class="agency" href="#main"><span class="seal" aria-hidden="true">🏆</span>Open Record <span aria-hidden="true">·</span> Public Data Snapshot</a>
+    <span class="tag"><span class="dot" aria-hidden="true"></span>Blockchain-verified civic data</span>
+  </div>
+</div>
+
+<div class="wrap">
+<main id="main">
+
+<!-- Hero -->
+<header class="hero">
+  <p class="kicker"><span class="dot" aria-hidden="true"></span>Case study · Frederick County, Virginia</p>
+  <h1>John Jewell: A Study in Radical Transparency</h1>
+  <p class="subtitle">Recognizing a public servant who published his entire personal calendar to the world — and the Bitcoin blockchain proof that it will never be forgotten.</p>
+  <div class="chip-row">
+    <span class="chip chip-verified">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1l1.8 1.4 2.2-.2.7 2.1 2 1-1 2 1 2-2 1-.7 2.1-2.2-.2L8 15l-1.8-1.4-2.2.2-.7-2.1-2-1 1-2-1-2 2-1 .7-2.1 2.2.2L8 1z" fill="currentColor" opacity=".25"/><path d="M4.6 8.2l2.1 2.1 4.7-4.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      SHA-256 verified · OpenTimestamps anchored
+    </span>
+    <span class="chip chip-neutral">Public export · no credentials used</span>
+    <span class="chip chip-neutral">Snapshot: October 21, 2026</span>
+  </div>
+</header>
+
+<!-- Stat cards -->
+<div class="stats" role="group" aria-label="Key figures from the calendar snapshot">
+  <div class="stat blue">
+    <div class="num">2,274</div>
+    <div class="lbl">Events in the feed</div>
+  </div>
+  <div class="stat">
+    <div class="num">1.5<span class="unit">&nbsp;MB</span></div>
+    <div class="lbl">Single .ics download</div>
+  </div>
+  <div class="stat btc">
+    <div class="num">13</div>
+    <div class="lbl">Publicly logged Carrabba's dinners</div>
+  </div>
+  <div class="stat green">
+    <div class="num">26</div>
+    <div class="lbl">Haircuts on the record</div>
+  </div>
+</div>
+
+<!-- 01 -->
+<section aria-labelledby="s-openbook">
+  <h2 id="s-openbook"><span class="idx">01</span> An Open-Book Leader</h2>
+  <div class="prose">
+    <p>
+      In an era when public officials guard their schedules behind formatting fees and
+      FOIA delays, <strong>John Jewell</strong> — Chairman of the Frederick County (Virginia)
+      Board of Supervisors — has quietly demonstrated a commitment to transparency that most
+      politicians only gesture at in campaign mailers.
+    </p>
+    <p>
+      His Google Calendar, associated with the account <code>jewell.john&#64;gmail.com</code>,
+      is publicly accessible to anyone on the internet. No password. No records request. No
+      waiting period. Board meetings, planning commission sessions, civic club dinners,
+      Masonic lodge events, personal appointments — all published, in machine-readable form,
+      for any constituent to read.
+    </p>
+    <blockquote>
+      Most elected officials <em>promise</em> an open-door policy. John Jewell simply left the door open.
+    </blockquote>
+  </div>
+</section>
+
+<!-- 02 -->
+<section aria-labelledby="s-means">
+  <h2 id="s-means"><span class="idx">02</span> What That Actually Means</h2>
+  <div class="prose">
+    <p>
+      A public Google Calendar isn't just a web page. Because Google exposes every public
+      calendar over a standard <code>.ics</code> (iCalendar) export endpoint, anyone can
+      download the <em>entire feed</em> — every event, every description, every location,
+      every attachment — in a single request:
+    </p>
+    <pre><code>curl -O "https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"</code></pre>
+    <p>
+      As of this writing, that one command returns <strong>2,274 events</strong> in a
+      1.5&nbsp;MB file. Google even helpfully expands recurring events decades into the future.
+    </p>
+  </div>
+</section>
+
+<!-- 03 -->
+<section aria-labelledby="s-highlights">
+  <h2 id="s-highlights"><span class="idx">03</span> Highlights from the Record</h2>
+  <div class="prose">
+    <p>
+      Radical transparency isn't just the big-ticket items. What makes this calendar
+      a landmark of open government is that it publishes <em>everything</em> — the
+      weighty and the mundane, side by side, all verifiable against the
+      blockchain-anchored hash above:
+    </p>
+  </div>
+  <ol class="timeline">
+    <li>
+      <span class="t-dot" aria-hidden="true">A</span>
+      <h3>The day job</h3>
+      <p>23 "Board of Supervisors" entries, 13 BOS
+      Work Sessions, 12 BOS Meetings, budget hearings, and joint sessions with
+      the School Board.</p>
+    </li>
+    <li>
+      <span class="t-dot green" aria-hidden="true">B</span>
+      <h3>Civic leadership at every scale</h3>
+      <p>Masonic lodge meetings,
+      veterans' dinners, candidate forums — and on July 10, 2026, an entry titled
+      <em>"Changing bulb in Church."</em> The Chairman changes the lightbulbs
+      himself.</p>
+    </li>
+    <li>
+      <span class="t-dot btc" aria-hidden="true">C</span>
+      <h3>A dining record for the ages</h3>
+      <p>Thirteen publicly logged
+      dinners at Carrabba's between April 2025 and September 2026.</p>
+    </li>
+    <li>
+      <span class="t-dot green" aria-hidden="true">D</span>
+      <h3>26 haircuts</h3>
+      <p>Including "Men's Haircut at Tiffany Reil"
+      on October 14, 2026 — six days before this snapshot was taken. The feed is
+      not just public; it is <em>alive</em>.</p>
+    </li>
+    <li>
+      <span class="t-dot" aria-hidden="true">E</span>
+      <h3>The annual rites</h3>
+      <p>An "Anniversary Dinner" block every
+      September, and the spring-returning duty known only as <em>"Pick Up
+      Geraniums."</em></p>
+    </li>
+  </ol>
+  <div class="prose" style="margin-top: 1.75rem;">
+    <p>
+      Every one of these entries sits inside the timestamped file. If a single
+      Carrabba's dinner were edited tomorrow, the hash wouldn't match and the whole
+      record would be provably altered. That is what permanence means.
+    </p>
+  </div>
+</section>
+
+<!-- 04 -->
+<section aria-labelledby="s-actions">
+  <h2 id="s-actions"><span class="idx">04</span> What We Did (October 2026)</h2>
+  <div class="prose">
+    <p>
+      To honor this contribution to open government — and to make sure the record of it is
+      preserved permanently — we did two things:
+    </p>
+    <ol class="steps">
+      <li><strong>Archived the full public feed</strong> twice: first on
+          October&nbsp;11,&nbsp;2026 (2,256 events), and again on October&nbsp;21,&nbsp;2026
+          (2,274 events, sha256 shown below).</li>
+      <li><strong>Timestamped the archive on the Bitcoin blockchain</strong> using
+          <a href="https://opentimestamps.org">OpenTimestamps</a>, an open standard that
+          anchors a file's SHA-256 hash into a Bitcoin transaction.</li>
+    </ol>
+  </div>
+
+  <div class="hash-card">
+    <div class="hash-head">
+      <span class="hash-title">SHA-256 digest</span>
+      <span class="chip chip-verified">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.6 8.2l2.1 2.1 4.7-4.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Anchored to Bitcoin
+      </span>
+    </div>
+    <span class="hash">c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a</span>
+  </div>
+
+  <div class="factbox">
+    <div class="fb-head">
+      <span class="fb-title">Snapshot record</span>
+      <span class="chip chip-verified">✓ Verified</span>
+    </div>
+    <dl>
+      <div class="row"><dt>File</dt><dd>jewell-latest.ics (1,509,891 bytes, 2,274 events)</dd></div>
+      <div class="row"><dt>SHA-256</dt><dd>c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a</dd></div>
+      <div class="row"><dt>Timestamped</dt><dd>2026-10-21 ~01:22 UTC, submitted to 4 OpenTimestamps calendar servers</dd></div>
+      <div class="row"><dt>Proof file</dt><dd>jewell-latest.ics.ots (735 bytes)</dd></div>
+      <div class="row"><dt>Downloads</dt><dd>
+        <span class="btn-row" style="margin-top:0;">
+          <a class="btn" href="jewell-latest.ics">⬇ jewell-latest.ics <span class="size">1.5 MB</span></a>
+          <a class="btn btc" href="jewell-latest.ics.ots">⬇ jewell-latest.ics.ots <span class="size">735 bytes</span></a>
+        </span>
+      </dd></div>
+    </dl>
+  </div>
+
+  <div class="prose">
+    <p>
+      Nothing about Chairman Jewell is ever written to the blockchain — only the
+      <em>hash</em> of the file is. The timestamp proves one thing, immutably and without
+      any trusted third party: <strong>this exact calendar file existed at this exact point
+      in time.</strong> It cannot be backdated, edited after the fact, or denied later.
+    </p>
+  </div>
+</section>
+
+<!-- 05 -->
+<section aria-labelledby="s-verify">
+  <h2 id="s-verify"><span class="idx">05</span> Verify It Yourself</h2>
+  <div class="prose">
+    <p>
+      Don't take our word for it. Anyone with the two files
+      (<code>jewell-latest.ics</code> + <code>jewell-latest.ics.ots</code>) can
+      independently confirm the timestamp against the Bitcoin blockchain:
+    </p>
+    <pre><code>pip install opentimestamps-client
+
+# confirm the file is untouched
+sha256sum jewell-latest.ics
+# → c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a
+
+# (once the Bitcoin transaction confirms, usually within a day)
+ots upgrade jewell-latest.ics.ots
+
+# verify against the blockchain
+ots verify jewell-latest.ics.ots</code></pre>
+  </div>
+</section>
+
+<!-- 06 -->
+<section aria-labelledby="s-recreate">
+  <h2 id="s-recreate"><span class="idx">06</span> Recreate the Entire Thing</h2>
+  <div class="prose">
+    <p>The full pipeline, start to finish, is four commands:</p>
+    <pre><code># 1. Download the public feed
+curl -O "https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"
+
+# 2. Hash it
+sha256sum basic.ics
+
+# 3. Anchor the hash in Bitcoin
+ots stamp basic.ics
+#    → creates basic.ics.ots
+
+# 4. Later, once confirmed on-chain
+ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
+    <p>
+      Repeat the process whenever you like; each snapshot gets its own blockchain
+      timestamp, building a tamper-evident chain of exactly what the calendar said, and when.
+    </p>
+  </div>
+</section>
+
+<!-- 07 -->
+<section aria-labelledby="s-why">
+  <h2 id="s-why"><span class="idx">07</span> Why It Matters</h2>
+  <div class="prose">
+    <p>
+      Transparency is easy to claim and hard to prove. Mr. Jewell's settings made the data
+      public; OpenTimestamps makes the <em>record</em> of that data permanent. Whether one
+      reads this as a triumph of open government, a cautionary tale about account settings,
+      or both — the blockchain now guarantees that the question can be discussed against a
+      fixed, verifiable record, forever.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <p>
+    Methodology: the calendar was accessed exclusively through Google's public export
+    endpoint, using no credentials or non-public access of any kind. Ownership
+    attribution (jewell.john&#64;gmail.com account header present on 485 invites;
+    in-event signature blocks reading "John Jewell, Chairman, Frederick County Board of
+    Supervisors") is documented in the project's internal methodology memo.
+    An OpenTimestamps proof attests only to a file's existence at a point in time;
+    it is not endorsed by, nor does it publish, the file's contents.
+  </p>
+  <p>Built with curl, sha256, and gratitude. Powered by Bitcoin block headers.</p>
+  <p>Made with love in the Shenandoah Valley using data center compute. ⚡</p>
+</footer>
+
+</main>
+</div>
+</body>
+</html>
