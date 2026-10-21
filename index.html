@@ -602,7 +602,8 @@ ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
 
       out.textContent = '✔ File integrity confirmed (SHA-256 matches Exhibit A)\nQuerying timestamp calendars and Bitcoin block explorer…';
       const otsBuf = await (await fetch('jewell-latest.ics.ots')).arrayBuffer();
-      const detachedOts  = OpenTimestamps.DetachedTimestampFile.deserialize(otsBuf);
+      const otsBytes = Array.from(new Uint8Array(otsBuf));
+      const detachedOts  = OpenTimestamps.DetachedTimestampFile.deserialize(otsBytes);
       const bytes = Array.from(new Uint8Array(icsBuf));
       const detachedFile = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), bytes);
       const opts = { timeout: 10000 };
@@ -627,7 +628,11 @@ ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
         } else { throw e; }
       }
     } catch (err) {
-      say('✘ Inspection failed:\n' + (err && err.message ? err.message : String(err)));
+      let msg = err && err.message ? err.message : String(err);
+      if (typeof msg === 'string' && /^[\d,\s]+$/.test(msg) && msg.length > 20) {
+        msg = 'malformed proof response (' + msg.slice(0, 60) + '…)';
+      }
+      say('✘ Inspection failed:\n' + msg);
     }
   });
 })();
