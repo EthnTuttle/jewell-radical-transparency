@@ -36,6 +36,30 @@ via the public Esplora API).
   block heights from `ots info` (no bitcoind needed) → self-check → push
 - Horizon: the watcher self-terminates after **2027-04-21** (≈6-month window)
 
+### Alerting
+
+`tools/notify.sh "subject" "body"` sends a nostr DM via the Marmot bot
+(`bot/marmot_bot.py`, run under `nix develop`). It is strictly
+fire-and-forget: bot absent, timeout, or send failure are logged to
+`~/.local/state/jewell/notify.log` and swallowed (always exits 0), so the
+watcher can never be broken by a failed notification. `snapshot.sh` calls
+it on: new snapshot sealed, seal anchored to a block, ANOMALY rejection,
+watcher failure (EXIT trap), and horizon conclusion (once). The no-change
+path stays silent.
+
+Operator notes:
+- **Spool/drain:** if the bot is absent or a send fails, the notification is
+  queued to `~/.local/state/jewell/spool/<unixts>-<rand>.json` (mode 600) and
+  drained — oldest first, ≤20 per run, suffixed `[drained from <ts>]` — on the
+  next run with a working bot; a file is deleted only after a confirmed send.
+- **Heartbeat:** if a run sends nothing and the last confirmed-OK send is
+  >7 days old, the watcher emits "record unchanged, seals healthy" (with
+  days-since-last-change), so a dead notification path can't masquerade as a
+  quiet register.
+- **Machine-readable status:** each `notify.sh` run writes
+  `last_rc=<n> last_ok_ts=<unix>` to `~/.local/state/jewell/notify.status`
+  (tmp + mv); `snapshot.sh` refreshes its heartbeat latch only when `last_rc=0`.
+
 ## Vendored assets
 
 - `vendor/opentimestamps.min.js` — opentimestamps v0.4.9 official browser

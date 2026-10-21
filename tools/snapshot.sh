@@ -28,21 +28,66 @@ set -euo pipefail
 
 HORIZON_END="2027-04-21"
 NOW="$(date -u +%FT%TZ)"; TODAY="${NOW%%T*}"
+SITE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(cd "$SITE_DIR/.." && pwd)"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/jewell"
+RUN_LOG="$STATE_DIR/snapshot.log"
+
+# ---- notifications (Marmot nostr DM bot; fire-and-forget, must never fail) --
+# NOTIFY and the traps are installed BEFORE the mkdir below, so that even a
+# failing mkdir still rings the bell. (SIGKILL is uncoverable: no trap can
+# fire on it; that gap is accepted and documented here.)
+NOTIFY="$SITE_DIR/tools/notify.sh"
+# `9>&-`: the flock fd 9 (acquired below) must never leak into the notify pipeline.
+notify() { "$NOTIFY" "$1" "$2" 9>&- || true; }
+NOTIFIED_FAILURE=0
+on_exit() {
+  trap - EXIT TERM INT HUP        # one-shot: the exit/kill below must not re-enter
+  local sig="${1:-}" rc=$?
+  case "$sig" in                  # 128+signo convention for the failure report
+    HUP)  rc=129 ;;
+    INT)  rc=130 ;;
+    TERM) rc=143 ;;
+  esac
+  # a failing rm must not suppress the failure bell
+  [ -z "${STAGE:-}" ] || rm -rf "$STAGE" 2>/dev/null || true
+  if [ "$rc" -ne 0 ] && [ "$NOTIFIED_FAILURE" = "0" ]; then
+    NOTIFIED_FAILURE=1
+    notify "jewell watch: WATCHER FAILED" \
+      "snapshot.sh exited rc=$rc${sig:+ (SIG$sig)} on ${TODAY}. Last log lines:
+$(tail -n 25 "$RUN_LOG" 2>/dev/null || true)"
+  fi
+  if [ -n "$sig" ]; then
+    kill -s "$sig" $$ 2>/dev/null || exit "$rc"  # re-raise: cron observes a real signal death
+    exit "$rc"
+  fi
+}
+trap on_exit EXIT
+trap 'on_exit TERM' TERM
+trap 'on_exit INT' INT
+trap 'on_exit HUP' HUP
+
+mkdir -p "$STATE_DIR"
+# cron already redirects stdout+stderr to $RUN_LOG; plain echo only — tee would
+# log every line twice.
 log() { echo "[snapshot ${NOW}] $*"; }
 
 if [[ "$TODAY" > "$HORIZON_END" ]]; then
   log "watch concluded (horizon ${HORIZON_END} reached). The register stands as published."
+  if [ ! -f "$STATE_DIR/horizon-notified" ]; then
+    # latch BEFORE notify: a slow (up to 120s) in-flight send must never
+    # allow a concurrent run to double-notify the horizon.
+    : > "$STATE_DIR/horizon-notified" 2>/dev/null || true
+    notify "jewell watch: HORIZON REACHED" \
+      "evidence window ${HORIZON_END} has passed; the register stands as published. Watcher is now silent."
+  fi
   exit 0
 fi
 
-SITE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_DIR="$(cd "$SITE_DIR/.." && pwd)"
 OTS="$PROJECT_DIR/.venv/bin/ots"
 PY="$PROJECT_DIR/.venv/bin/python"
 FEED_URL="https://calendar.google.com/calendar/ical/jewell.john%40gmail.com/public/basic.ics"
 MANIFEST="snapshots/snapshots.json"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/jewell"
-mkdir -p "$STATE_DIR"
 
 exec 9>"$STATE_DIR/snapshot.lock"
 flock -n 9 || { log "another run in progress; exiting."; exit 0; }
@@ -51,7 +96,6 @@ cd "$SITE_DIR"
 
 STAGE="$(mktemp -d)"
 TMP="$STAGE/feed.ics"
-trap 'rm -rf "$STAGE"' EXIT
 
 # ---- canonical content hashing ---------------------------------------------
 canon() {  # canonical content hash of an ics file -> stdout (see tools/canon.py)
@@ -90,7 +134,20 @@ if [[ "$LATEST_DATE" = "$TODAY" ]]; then
 elif [[ "$NEW_CANON" != "$LATEST_CANON" ]]; then
   if [[ "$LATEST_EVENTS" -gt 0 && "$NEW_COUNT" -lt $(( LATEST_EVENTS / 2 )) ]]; then
     log "ANOMALY: event count collapsed (${LATEST_EVENTS} -> ${NEW_COUNT}); not archiving today."
+    # Deliberate once-per-anomaly guard (same idea as the horizon latch): the
+    # marker stores the LATEST_EVENTS/NEW_COUNT pair; we re-notify ONLY if the
+    # counts change again. Healthy paths below clear the marker. Latch before
+    # notify so a slow send can't race into a double notification.
+    ANOMALY_KEY="$LATEST_EVENTS $NEW_COUNT"
+    if [ "$(cat "$STATE_DIR/anomaly-notified" 2>/dev/null || true)" != "$ANOMALY_KEY" ]; then
+      printf '%s\n' "$ANOMALY_KEY" > "$STATE_DIR/anomaly-notified" 2>/dev/null || true
+      notify "jewell watch: ANOMALY" \
+        "event count collapsed (${LATEST_EVENTS} -> ${NEW_COUNT}) on ${TODAY}; today's capture rejected, register unchanged."
+    else
+      log "ANOMALY unchanged (${ANOMALY_KEY}); already notified, staying quiet."
+    fi
   else
+    rm -f "$STATE_DIR/anomaly-notified" 2>/dev/null || true  # healthy capture: reset the guard
     log "record changed (canon ${NEW_CANON:0:12}…, ${NEW_COUNT} events); staging seal…"
     install -m 0644 "$TMP" "$STAGE/snapshot.ics"
     "$OTS" stamp "$STAGE/snapshot.ics" </dev/null 2>&1 | tail -2
@@ -122,9 +179,15 @@ os.replace(tmp, manifest)
 print(f"manifest: registered {date} ({events} events)")
 PY
     CHANGED=1
+    notify "jewell watch: NEW SNAPSHOT sealed ${TODAY}" \
+      "events:      ${NEW_COUNT}
+raw sha256:  ${STAGED_HASH:0:16}…
+canon hash:  ${NEW_CANON:0:16}…
+snapshot:    ${DIR}"
   fi
 else
   log "no content change (canon ${NEW_CANON:0:12}…)."
+  rm -f "$STATE_DIR/anomaly-notified" 2>/dev/null || true  # feed matches register: reset the guard
 fi
 
 # ---- upgrade pending proofs; harvest block heights via ots info -------------
@@ -156,6 +219,9 @@ PY
       cp "$proof" jewell-latest.ics.ots
     fi
     CHANGED=1
+    ENTRY_DATE="${proof#snapshots/}"; ENTRY_DATE="${ENTRY_DATE%%/*}"
+    notify "jewell watch: SEAL ANCHORED block #${block}" \
+      "entry date: ${ENTRY_DATE} (proof: ${proof})"
   fi
 done <<< "$PENDING"
 rm -f snapshots/*/*.bak 2>/dev/null || true
@@ -182,11 +248,48 @@ if [ "$CHANGED" = "1" ]; then
       -c user.email="EthnTuttle@users.noreply.github.com" \
       commit -qm "Snapshot register update ${TODAY}"
 fi
-git pull --rebase --autostash -q || true
+git pull --rebase --autostash -q 9>&- || true
 if [ -n "$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)" ] && \
    [ "$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)" != "0" ]; then
-  git push -q
+  git push -q 9>&-
   log "pushed register update."
 else
   log "nothing to push."
+fi
+
+# ---- weekly liveness heartbeat: silence is unverifiable ----------------------
+# A quiet register and a dead notification path look identical from the
+# outside. If this run sent no notifications (no new seal, nothing anchored)
+# and the last confirmed-OK send is older than 7 days (or unknown), emit a
+# heartbeat. The latch ($HB_FILE) is refreshed ONLY when notify.sh reports
+# last_rc=0 in notify.status. Every step is guarded — non-fatal under set -e.
+if [ "$CHANGED" = "0" ]; then
+  HB_FILE="$STATE_DIR/last-notify-ok-ts"
+  NOW_S="$(date +%s)"
+  status_rc() { sed -n 's/.*\blast_rc=\([0-9][0-9]*\).*/\1/p' "$STATE_DIR/notify.status" 2>/dev/null | tail -n 1; }
+  # a successful send earlier in THIS run (e.g. ANOMALY) also proves liveness
+  if [ "$(status_rc)" = "0" ]; then
+    printf '%s\n' "$NOW_S" > "$HB_FILE" 2>/dev/null || true
+  else
+    LAST_OK="$(cat "$HB_FILE" 2>/dev/null || echo 0)"
+    case "$LAST_OK" in ''|*[!0-9]*) LAST_OK=0 ;; esac
+    if [ $(( NOW_S - LAST_OK )) -gt 604800 ]; then
+      HB_DAYS="$("$PY" - "$MANIFEST" 2>/dev/null <<'PY' || echo "?"
+import json, sys, datetime
+try:
+    d = json.load(open(sys.argv[1]))
+    t = datetime.datetime.fromisoformat(d[-1]["entered_utc"].replace("Z", "+00:00"))
+    print((datetime.datetime.now(datetime.timezone.utc) - t).days)
+except Exception:
+    print("?")
+PY
+)"
+      notify "jewell watch: heartbeat — record unchanged, seals healthy" \
+        "no register changes and no confirmed notifications for 7+ days; watcher alive. Last register change: ${HB_DAYS} days before this run."
+      # refresh the latch only if the heartbeat actually went out
+      if [ "$(status_rc)" = "0" ]; then
+        printf '%s\n' "$NOW_S" > "$HB_FILE" 2>/dev/null || true
+      fi
+    fi
+  fi
 fi
