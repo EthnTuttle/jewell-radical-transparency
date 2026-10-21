@@ -8,7 +8,7 @@
     "canon": "ca3d4e98c14476e2381a8275947e95010d7db6fc50f484858bd50c76df88599b",
     "events": 2274,
     "bytes": 1509891,
-    "status": "pending",
-    "block": null
+    "status": "anchored",
+    "block": 972401
   }
 ]
