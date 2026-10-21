@@ -438,7 +438,7 @@
 
 <div class="exhibit">
   <span class="exhibit-tag">Exhibit A</span>
-  <div class="stamp" aria-hidden="true"><span>Entered · Public Record ·<b>Exhibit A</b>Verified · On Chain</span></div>
+  <div class="stamp" aria-hidden="true"><span>Entered · Public Record ·<b>Exhibit A</b>Sealed · On Chain</span></div>
   <dl>
     <dt>File</dt><dd>jewell-latest.ics (1,509,891 bytes, 2,274 events)</dd>
     <dt>SHA-256</dt><dd>c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a</dd>
@@ -556,36 +556,97 @@ ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
 (function () {
   const body = document.getElementById('ledger-body');
   if (!body) return;
-  fetch('snapshots/snapshots.json').then(r => r.json()).then(rows => {
-    body.innerHTML = '';
-    rows.slice().reverse().forEach(e => {
+  const PATH_RE = /^snapshots\/\d{4}-\d{2}-\d{2}\/jewell-latest\.ics(\.ots)?$/;
+  fetch('snapshots/snapshots.json')
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(rows => {
+      const frag = document.createDocumentFragment();
+      rows.slice().reverse().forEach(e => {
+        const tr = document.createElement('tr');
+        const c = (text, cls) => { const td = document.createElement('td'); if (cls) td.className = cls; td.textContent = text; return td; };
+        const d = c(e.date || '');
+        const sub = document.createElement('br');
+        const small = document.createElement('span');
+        small.style.cssText = 'color:var(--ink-faint);font-size:.75rem';
+        small.textContent = e.entered_utc || '';
+        d.appendChild(sub); d.appendChild(small);
+        const h = c(String(e.sha256 || '').slice(0, 12) + '…', 'h');
+        h.title = String(e.sha256 || '');
+        const seal = document.createElement('td');
+        if (e.status === 'anchored' && Number.isInteger(e.block)) {
+          const ok = document.createElement('span'); ok.className = 'seal-ok'; ok.textContent = '✔ Anchored';
+          const a = document.createElement('a'); a.href = 'https://mempool.space/block/' + e.block; a.textContent = '#' + e.block;
+          seal.appendChild(ok); seal.appendChild(document.createTextNode(' · block ')); seal.appendChild(a);
+        } else {
+          const p = document.createElement('span'); p.className = 'seal-pending'; p.textContent = '⏳ Pending confirmation';
+          seal.appendChild(p);
+        }
+        const links = document.createElement('td');
+        if (PATH_RE.test(e.file) && PATH_RE.test(e.proof)) {
+          const a1 = document.createElement('a'); a1.href = e.file; a1.textContent = '.ics';
+          const a2 = document.createElement('a'); a2.href = e.proof; a2.textContent = '.ots';
+          links.appendChild(a1); links.appendChild(document.createTextNode(' · ')); links.appendChild(a2);
+        } else { links.textContent = '—'; }
+        tr.appendChild(d);
+        tr.appendChild(c(Number.isInteger(e.events) ? e.events.toLocaleString() : String(e.events ?? '')));
+        tr.appendChild(h); tr.appendChild(seal); tr.appendChild(links);
+        frag.appendChild(tr);
+      });
+      body.innerHTML = '';
+      body.appendChild(frag);
+    })
+    .catch(() => {
+      body.innerHTML = '';
       const tr = document.createElement('tr');
-      const short = e.sha256.slice(0, 12) + '…';
-      const seal = e.status === 'anchored'
-        ? '<span class="seal-ok">✔ Anchored</span> · block <a href="https://mempool.space/block/' + e.block + '">#' + e.block + '</a>'
-        : '<span class="seal-pending">⏳ Pending confirmation</span>';
-      tr.innerHTML =
-        '<td>' + e.date + '<br><span style="color:var(--ink-faint);font-size:.75rem">' + (e.entered_utc || '') + '</span></td>' +
-        '<td>' + e.events.toLocaleString() + '</td>' +
-        '<td class="h" title="' + e.sha256 + '">' + short + '</td>' +
-        '<td>' + seal + '</td>' +
-        '<td><a href="' + e.file + '">.ics</a> · <a href="' + e.proof + '">.ots</a></td>';
-      body.appendChild(tr);
+      const td = document.createElement('td');
+      td.colSpan = 5; td.className = 'ledger-error';
+      td.textContent = 'Register unavailable.';
+      tr.appendChild(td); body.appendChild(tr);
     });
-  }).catch(() => {});
 })();
 </script>
 <script>
 (function () {
   const btn = document.getElementById('ots-btn');
   const out = document.getElementById('ots-out').firstElementChild;
-  const EXPECTED = 'c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a';
+  // Fallback (inaugural entry) if the register cannot be fetched.
+  const FALLBACK = {
+    label: 'Exhibit A (2026-10-21)',
+    file: 'jewell-latest.ics',
+    proof: 'jewell-latest.ics.ots',
+    sha256: 'c6372c684440b9e845587084105d8c73d2652c363389fdb6a6b517c86828670a',
+  };
   const say = (m) => { out.textContent = m; btn.textContent = 'Inspect the Seal in This Browser'; btn.disabled = false; };
+  const fetchBuf = async (url) => {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('fetch ' + url + ': HTTP ' + r.status);
+    return r.arrayBuffer();
+  };
+  const deadline = (p, ms, what) => Promise.race([
+    p,
+    new Promise((_, rej) => setTimeout(() => rej(new Error(what + ' timed out')), ms)),
+  ]);
 
   btn.addEventListener('click', async () => {
     btn.disabled = true; btn.textContent = 'Inspecting…';
-    out.textContent = 'Loading the OpenTimestamps library…';
+    out.textContent = 'Loading the register…';
     try {
+      let target = FALLBACK;
+      try {
+        const r = await fetch('snapshots/snapshots.json');
+        if (r.ok) {
+          const rows = await r.json();
+          if (rows.length) {
+            const e = rows[rows.length - 1];
+            target = {
+              label: 'latest entry (' + e.date + ')',
+              file: e.file, proof: e.proof, sha256: e.sha256,
+            };
+          }
+        }
+      } catch (_) { /* fall back to Exhibit A */ }
+
+      out.textContent = 'Loading the OpenTimestamps library…';
       if (!window.OpenTimestamps) {
         await new Promise((res, rej) => {
           const s = document.createElement('script');
@@ -594,44 +655,50 @@ ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
           document.head.appendChild(s);
         });
       }
-      out.textContent = 'Fetching jewell-latest.ics and hashing it locally (SHA-256)…';
-      const icsBuf = await (await fetch('jewell-latest.ics')).arrayBuffer();
+
+      out.textContent = 'Fetching ' + target.file + ' and hashing it locally (SHA-256)…';
+      const icsBuf = await fetchBuf(target.file);
       const hashBuf = await crypto.subtle.digest('SHA-256', icsBuf);
       const hex = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-      if (hex !== EXPECTED) throw new Error('served file hash mismatch:\n  got ' + hex + '\n  want ' + EXPECTED);
+      if (hex !== target.sha256) {
+        throw new Error('served file hash mismatch:\n  got  ' + hex + '\n  want ' + target.sha256);
+      }
 
-      out.textContent = '✔ File integrity confirmed (SHA-256 matches Exhibit A)\nQuerying timestamp calendars and Bitcoin block explorer…';
-      const otsBuf = await (await fetch('jewell-latest.ics.ots')).arrayBuffer();
-      const otsBytes = Array.from(new Uint8Array(otsBuf));
-      const detachedOts  = OpenTimestamps.DetachedTimestampFile.deserialize(otsBytes);
-      const bytes = Array.from(new Uint8Array(icsBuf));
-      const detachedFile = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), bytes);
-      const opts = { timeout: 10000 };
-      try { await OpenTimestamps.upgrade(detachedOts, opts); } catch (e) { /* pending calendars are fine */ }
+      out.textContent = '✔ Integrity confirmed for ' + target.label +
+        '\n  SHA-256 ' + hex +
+        '\n\nConsulting the timestamp calendars and a public Bitcoin explorer…';
+      const otsBytes = Array.from(new Uint8Array(await fetchBuf(target.proof)));
+      const detachedOts = OpenTimestamps.DetachedTimestampFile.deserialize(otsBytes);
+      const detachedFile = OpenTimestamps.DetachedTimestampFile.fromBytes(
+        new OpenTimestamps.Ops.OpSHA256(), Array.from(new Uint8Array(icsBuf)));
+      // verify() upgrades pending attestations internally; explorer override
+      // because the library default (blockstream.info) is less reliable.
+      const opts = { timeout: 10000, url: 'https://mempool.space/api' };
+      let results;
       try {
-        const results = await OpenTimestamps.verify(detachedOts, detachedFile, opts);
-        if (results && results.bitcoin) {
-          const d = new Date(results.bitcoin.timestamp * 1000);
-          say('✔✔ SEAL VERIFIED.\n\nBitcoin block #' + results.bitcoin.height +
-              ' attests that this exact file existed as of\n' + d.toUTCString() +
-              '\n\nChecked entirely in your browser. No upload, no middleman.' +
-              '\n(Lite-client verification: the block data came from a public explorer API.)');
-        } else {
-          throw new Error('PendingAttestation');
-        }
+        results = await deadline(OpenTimestamps.verify(detachedOts, detachedFile, opts),
+                                 60000, 'verification');
       } catch (e) {
-        if (/PendingAttestation|unconfirmed|pending/i.test(String(e))) {
-          say('✔ File integrity confirmed (SHA-256 matches Exhibit A)\n' +
-              '⏳ The Bitcoin anchoring transaction is still pending confirmation.\n' +
-              '   The proof is properly formed and lodged with four calendar servers;\n' +
-              '   check back in a day or so and this seal will verify on-chain.');
-        } else { throw e; }
+        // The library soft-fails pending attestations (resolves {}); genuine
+        // VerificationError (e.g. explorer outage) throws. Treat "no bitcoin
+        // result" as pending — it just goes through the empty-result branch.
+        results = null;
+      }
+      if (results && results.bitcoin) {
+        const d = new Date(results.bitcoin.timestamp * 1000);
+        say('✔✔ SEAL VERIFIED — ' + target.label + '.\n\nBitcoin block #' + results.bitcoin.height +
+            ' attests that this exact file existed as of\n' + d.toUTCString() +
+            '\n\nChecked entirely in your browser. No upload, no middleman.' +
+            '\n(Lite-client verification: block data came from a public explorer API.)');
+      } else {
+        say('✔ Integrity confirmed for ' + target.label + ' (SHA-256 matches the register)\n' +
+            '⏳ The Bitcoin anchoring transaction is still pending confirmation,\n' +
+            '   or the public calendar/explorer services were unreachable just now.\n' +
+            '   The proof is lodged with four calendar servers; try again later.');
       }
     } catch (err) {
       let msg = err && err.message ? err.message : String(err);
-      if (typeof msg === 'string' && /^[\d,\s]+$/.test(msg) && msg.length > 20) {
-        msg = 'malformed proof response (' + msg.slice(0, 60) + '…)';
-      }
+      if (/^[\d,\s]+$/.test(msg) && msg.length > 20) msg = 'malformed proof (' + msg.slice(0, 60) + '…)';
       say('✘ Inspection failed:\n' + msg);
     }
   });

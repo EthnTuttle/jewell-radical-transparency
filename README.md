@@ -19,5 +19,26 @@ sha256sum jewell-latest.ics
 
 pip install opentimestamps-client
 ots upgrade jewell-latest.ics.ots   # once the Bitcoin tx confirms
-ots verify jewell-latest.ics.ots
+ots verify jewell-latest.ics.ots    # requires a local Bitcoin node
 ```
+
+Or press "Inspect the Seal in This Browser" on the page — it verifies the
+newest register entry entirely client-side (file hash + on-chain attestation,
+via the public Esplora API).
+
+## Rolling register
+
+- `snapshots/YYYY-MM-DD/` — one archived capture (+ proof) per UTC day on
+  which the feed's *canonicalized* content changed
+- `snapshots/snapshots.json` — manifest consumed by the page ledger
+- `tools/snapshot.sh` — daily watcher (cron): fetch → canonical compare
+  (`tools/canon.py`) → stamp raw bytes → upgrade pending proofs → harvest
+  block heights from `ots info` (no bitcoind needed) → self-check → push
+- Horizon: the watcher self-terminates after **2027-04-21** (≈6-month window)
+
+## Vendored assets
+
+- `vendor/opentimestamps.min.js` — opentimestamps v0.4.9 official browser
+  bundle (from opentimestamps.org), sha256
+  `f6181ae00cce58773f8710894c99d0656058f6a1e08c57360b263cd46c54fbf2`
+
