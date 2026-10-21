@@ -169,6 +169,26 @@
   blockquote::before { top: -4px; }
   blockquote::after { bottom: -4px; }
 
+  /* ————— register of snapshots ————— */
+  .ledger { width: 100%; border-collapse: collapse; margin: 1.2rem 0 1.6rem; font-size: .82rem; }
+  .ledger caption {
+    text-align: left; font-style: italic; color: var(--ink-faint);
+    font-size: .8rem; padding-bottom: .4rem;
+  }
+  .ledger th, .ledger td {
+    padding: .45em .6em; text-align: left; vertical-align: top;
+    border-bottom: 1px solid var(--rule-faint);
+  }
+  .ledger thead th {
+    font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-faint); border-bottom: 2px solid var(--rule);
+    font-weight: normal;
+  }
+  .ledger td.h { font-family: var(--mono); font-size: .72rem; word-break: break-all; }
+  .seal-ok { color: #2f6b33; font-weight: bold; }
+  .seal-pending { color: var(--seal); font-style: italic; }
+  .ledger-error { font-style: italic; color: var(--ink-faint); }
+
   /* ————— in-browser verification ————— */
   .vbtn {
     font-family: var(--serif);
@@ -410,6 +430,10 @@
   <li><strong>Timestamped the archive on the Bitcoin blockchain</strong> using
       <a href="https://opentimestamps.org">OpenTimestamps</a>, an open standard that
       anchors a file's SHA-256 hash into a Bitcoin transaction.</li>
+  <li><strong>Instituted a standing watch.</strong> The public feed is now
+      re-examined automatically once a day; whenever the record changes, the
+      new state of the record is archived and sealed anew (see the Register
+      of Snapshots, next).</li>
 </ol>
 
 <div class="exhibit">
@@ -430,6 +454,31 @@
   any trusted third party: <strong>this exact calendar file existed at this exact point
   in time.</strong> It cannot be backdated, edited after the fact, or denied later.
 </p>
+
+<h2>The Register of Snapshots</h2>
+<p>
+  Transparency deserves a running ledger. Each entry below is a state of the
+  public record as captured on that date, together with its blockchain seal.
+  A new entry is entered whenever the <em>content</em> of the feed changes —
+  note that Google serves the same events in a different byte order and with
+  fresh transmission stamps on nearly every download, so "change" is measured
+  on the canonicalized record (event blocks sorted by identifier, transmission
+  stamps disregarded). Each seal, however, attests to the exact bytes of the
+  file offered for download beside it. Indeed, the record proved lively from
+  the very first night: within half an hour of the inaugural seal, the feed had
+  gained three new events, including two entries optimistically titled
+  "Potential Scranton Trip."
+</p>
+<table class="ledger">
+  <caption>Register of Snapshots — updated daily by standing watch</caption>
+  <thead>
+    <tr><th>Entered</th><th>Events</th><th>SHA-256</th><th>Seal</th><th>Instruments</th></tr>
+  </thead>
+  <tbody id="ledger-body">
+    <tr><td colspan="5" class="ledger-error">Register loading… (if this message
+        persists, consult <a href="snapshots/snapshots.json">snapshots/snapshots.json</a> directly)</td></tr>
+  </tbody>
+</table>
 
 <h2>Verify It Yourself</h2>
 <p>
@@ -503,6 +552,29 @@ ots upgrade basic.ics.ots &amp;&amp; ots verify basic.ics.ots</code></pre>
 </footer>
 
 </div>
+<script>
+(function () {
+  const body = document.getElementById('ledger-body');
+  if (!body) return;
+  fetch('snapshots/snapshots.json').then(r => r.json()).then(rows => {
+    body.innerHTML = '';
+    rows.slice().reverse().forEach(e => {
+      const tr = document.createElement('tr');
+      const short = e.sha256.slice(0, 12) + '…';
+      const seal = e.status === 'anchored'
+        ? '<span class="seal-ok">✔ Anchored</span> · block <a href="https://mempool.space/block/' + e.block + '">#' + e.block + '</a>'
+        : '<span class="seal-pending">⏳ Pending confirmation</span>';
+      tr.innerHTML =
+        '<td>' + e.date + '<br><span style="color:var(--ink-faint);font-size:.75rem">' + (e.entered_utc || '') + '</span></td>' +
+        '<td>' + e.events.toLocaleString() + '</td>' +
+        '<td class="h" title="' + e.sha256 + '">' + short + '</td>' +
+        '<td>' + seal + '</td>' +
+        '<td><a href="' + e.file + '">.ics</a> · <a href="' + e.proof + '">.ots</a></td>';
+      body.appendChild(tr);
+    });
+  }).catch(() => {});
+})();
+</script>
 <script>
 (function () {
   const btn = document.getElementById('ots-btn');
