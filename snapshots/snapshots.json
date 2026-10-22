@@ -10,5 +10,17 @@
     "bytes": 1509891,
     "status": "anchored",
     "block": 972401
+  },
+  {
+    "date": "2026-10-22",
+    "entered_utc": "2026-10-22T09:17:01Z",
+    "file": "snapshots/2026-10-22/jewell-latest.ics",
+    "proof": "snapshots/2026-10-22/jewell-latest.ics.ots",
+    "sha256": "72f9051215ee485700d19cfde61d5d71798e638b9d754fc899340f37b01cff73",
+    "canon": "115d1070772d352ba810c01e2674557d35acb4165416d8ec53bdbf859a7a49f0",
+    "events": 2262,
+    "bytes": 1498211,
+    "status": "pending",
+    "block": null
   }
 ]
