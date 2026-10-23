@@ -20,6 +20,18 @@
     "canon": "115d1070772d352ba810c01e2674557d35acb4165416d8ec53bdbf859a7a49f0",
     "events": 2262,
     "bytes": 1498211,
+    "status": "anchored",
+    "block": 972602
+  },
+  {
+    "date": "2026-10-23",
+    "entered_utc": "2026-10-23T09:17:01Z",
+    "file": "snapshots/2026-10-23/jewell-latest.ics",
+    "proof": "snapshots/2026-10-23/jewell-latest.ics.ots",
+    "sha256": "619a13a12a0c85eca7ba9c0f59ac12382fdcbcf118da87b027d1b0be7c87f0df",
+    "canon": "a4fad4b800e5fa6f5cf9408875f589c7a26775ea3d9c44da931af27d2663f928",
+    "events": 2263,
+    "bytes": 1498485,
     "status": "pending",
     "block": null
   }
